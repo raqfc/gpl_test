@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/db-schema
+
+generator client {
+    provider = "db-client-js"
+}
+
+generator typegraphql {
+  provider = "typegraphql-db"
+  output   = "../db/generated/type-graphql"
+}
+
+datasource postgres {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id                       String            @id @default(uuid())
+    email                    String            @unique
+    name                     String?
+    role                     Role              @default(USER)
+    supervisedAppointments   Appointment[]     @relation("supervisor")
+    appointments             Appointment[]     @relation("customer")
+}
+
+model Appointment {
+    id             String       @id @default(uuid())
+    supervisor     User         @relation("supervisor", fields: [supervisorId], references: [id])
+    supervisorId   String
+    customer       User         @relation("customer", fields: [customerId], references: [id])
+    customerId     String
+    proceduresIds  Procedure[]
+    startsAt       DateTime
+    endsAt         DateTime
+ }
+
+ model Procedure {
+    id            String         @id @default(uuid())
+    name          String
+    idProc        String
+    appointments  Appointment[]
+ }
+
+enum Role {
+    USER
+    SUPERVISOR
+    CUSTOMER
+}

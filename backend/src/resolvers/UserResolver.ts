@@ -1,5 +1,5 @@
 import { Arg, Mutation, Query, Resolver } from "type-graphql";
-import { User } from "../dtos/models/User";
+import { User } from "../models/User";
 import crypto from 'crypto';
 
 //query: busca dados
