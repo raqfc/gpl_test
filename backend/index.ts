@@ -22,9 +22,12 @@ async function startApolloServer() {
     const app = express();
     const httpServer = http.createServer(app);
 
+    const pubSub = new PubSub();
+
     const schema = await buildSchema({
         resolvers: [CustomAppointmentsResolver, ...resolvers],
         emitSchemaFile: path.resolve(__dirname, 'schema.gql'),
+        pubSub: pubSub
     });
 
     const wsServer = new WebSocketServer({
@@ -32,13 +35,39 @@ async function startApolloServer() {
         path: '/graphql',
     });
 
-    const serverCleanup = useServer({schema}, wsServer);
+    const serverCleanup = useServer({
+        schema,
+        onConnect: async (ctx) => {
+            console.log('onConnect!');
+            // console.log("ctx", ctx);
+            // console.log('--');
+            // if (tokenIsNotValid(ctx.connectionParams)) {
+            //     throw new Error('Auth token missing!');
+            // }
+            return { extended: 'context' };
+        },
+        onDisconnect(ctx, code, reason) {
+            console.log('onDisconnect!');
+            // console.log('--');
+        },
+        context: async (ctx, message, args) => {
+            // If we build the context for subscriptions, return the context generated in the onConnect callback.
+            // In this example `connection.context` is `{ extended: 'context' }`
+            console.log('context!');
+            // console.log("ctx", ctx.connectionParams);
 
+            // console.log('--');
+            // if (!req || !req.headers) {
+            //     return connection.context;
+            // }
+            //
+            // // Build context for normal requests
+            return ctx;
+        },
+    }, wsServer);
 
-
-    const pubSub = new PubSub();
     const prisma = new PrismaClient();
-    pubSub.asyncIterator("alo")
+
     const server = new ApolloServer({
         schema,
         csrfPrevention: true,
