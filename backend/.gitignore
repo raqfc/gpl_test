@@ -1,6 +1,6 @@
 package-lock.json
 .env
-/prisma/generated
+*/generated
 # Logs
 logs
 *.log

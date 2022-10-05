@@ -477,6 +477,7 @@ type Mutation {
   deleteOneAppointment(where: AppointmentWhereUniqueInput!): Appointment
   deleteOneProcedure(where: ProcedureWhereUniqueInput!): Procedure
   deleteOneUser(where: UserWhereUniqueInput!): User
+  test: String!
   updateManyAppointment(data: AppointmentUpdateManyMutationInput!, where: AppointmentWhereInput): AffectedRowsOutput!
   updateManyProcedure(data: ProcedureUpdateManyMutationInput!, where: ProcedureWhereInput): AffectedRowsOutput!
   updateManyUser(data: UserUpdateManyMutationInput!, where: UserWhereInput): AffectedRowsOutput!
@@ -920,6 +921,10 @@ input StringWithAggregatesFilter {
   not: NestedStringWithAggregatesFilter
   notIn: [String!]
   startsWith: String
+}
+
+type Subscription {
+  observeManyAppointments: String!
 }
 
 type User {

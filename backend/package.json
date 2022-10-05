@@ -19,6 +19,7 @@
     "express": "^4.18.1",
     "graphql": "^15.8.0",
     "graphql-fields": "^2.0.3",
+    "graphql-subscriptions": "^2.0.0",
     "graphql-ws": "^5.11.2",
     "reflect-metadata": "^0.1.13",
     "tslib": "^2.4.0",

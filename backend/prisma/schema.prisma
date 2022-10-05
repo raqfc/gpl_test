@@ -2,12 +2,12 @@
 // learn more about it in the docs: https://pris.ly/d/db-schema
 
 generator client {
-    provider = "db-client-js"
+    provider = "prisma-client-js"
 }
 
 generator typegraphql {
-  provider = "typegraphql-db"
-  output   = "../db/generated/type-graphql"
+  provider = "typegraphql-prisma"
+  output   = "../prisma/generated/type-graphql"
 }
 
 datasource postgres {

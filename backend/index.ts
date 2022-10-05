@@ -13,14 +13,17 @@ import { useServer } from 'graphql-ws/lib/use/ws';
 
 import { PrismaClient } from "@prisma/client";
 
+import { PubSub } from 'graphql-subscriptions';
+
 import { resolvers } from "./prisma/generated/type-graphql";
+import { CustomAppointmentsResolver } from "./src/resolvers/CustomAppointmentsResolver";
 
 async function startApolloServer() {
     const app = express();
     const httpServer = http.createServer(app);
 
     const schema = await buildSchema({
-        resolvers: resolvers,//[UserResolver, AppointmentsResolver, ...resolvers],
+        resolvers: [CustomAppointmentsResolver, ...resolvers],
         emitSchemaFile: path.resolve(__dirname, 'schema.gql'),
     });
 
@@ -31,12 +34,19 @@ async function startApolloServer() {
 
     const serverCleanup = useServer({schema}, wsServer);
 
+
+
+    const pubSub = new PubSub();
     const prisma = new PrismaClient();
+    pubSub.asyncIterator("alo")
     const server = new ApolloServer({
         schema,
         csrfPrevention: true,
         cache: 'bounded',
-        context: () => ({prisma}),
+        context: () => ({
+            prisma,
+            pubSub
+        }),
         plugins: [
             ApolloServerPluginDrainHttpServer({httpServer}),
             ApolloServerPluginLandingPageLocalDefault({embed: true}),
