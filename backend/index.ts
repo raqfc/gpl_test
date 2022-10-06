@@ -16,7 +16,11 @@ import { PrismaClient } from "@prisma/client";
 import { PubSub } from 'graphql-subscriptions';
 
 import { resolvers } from "./prisma/generated/type-graphql";
-import { CustomAppointmentsResolver } from "./src/resolvers/CustomAppointmentsResolver";
+import {
+    APPOINTMENTS_TOPIC,
+    CustomAppointmentsResolver,
+    NotificationPayload
+} from "./src/resolvers/CustomAppointmentsResolver";
 
 import pgPool from "./src/db/db"
 
@@ -41,11 +45,6 @@ async function startApolloServer() {
         schema,
         onConnect: async (ctx) => {
             console.log('onConnect!');
-            // console.log("ctx", ctx);
-            // console.log('--');
-            // if (tokenIsNotValid(ctx.connectionParams)) {
-            //     throw new Error('Auth token missing!');
-            // }
             return { extended: 'context' };
         },
         onDisconnect(ctx, code, reason) {
@@ -56,14 +55,6 @@ async function startApolloServer() {
             // If we build the context for subscriptions, return the context generated in the onConnect callback.
             // In this example `connection.context` is `{ extended: 'context' }`
             console.log('context!');
-            // console.log("ctx", ctx.connectionParams);
-
-            // console.log('--');
-            // if (!req || !req.headers) {
-            //     return connection.context;
-            // }
-            //
-            // // Build context for normal requests
             return ctx;
         },
     }, wsServer);
@@ -101,34 +92,26 @@ async function startApolloServer() {
 
     /////////////////////////////////////////////////////////////////
     //testing pg subscription
-    await pgPool.connect((err, client) =>{
+    await pgPool.connect((err, client) => {
         // Listen for all pg_notify channel messages
         if(err) {
             console.log("Error connecting Postgres-pg instance",err)
         } else {
-            console.log("client",client)
             client.on('notification', function(msg) {
                 console.log("notification")
                 console.log("msg.payload", msg.payload)
                 // if (typeof msg.payload === "string") {
                 //     let payload = JSON.parse(msg.payload);
                 // }
-
+                const payload: NotificationPayload = { message: "att vinda do postgres" };
+                pubSub.publish(APPOINTMENTS_TOPIC, payload)
             });
 
             // Designate which channels we are listening on. Add additional channels with multiple lines.
-            client.query('LISTEN new_order');
+            client.query('LISTEN new_user');
         }
     })
 
-    //precisa do `wal_level` >= logical configurado no postgres
-    // await pg.subscribe('insert', (row, info) => {
-    //     console.log("subscriber called")
-    //     console.log("row", row)
-    //     console.log("info", info)
-    //     console.log("--")
-    //     console.log("--")
-    // })
 }
 
 startApolloServer().then(r => {
