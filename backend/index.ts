@@ -18,6 +18,8 @@ import { PubSub } from 'graphql-subscriptions';
 import { resolvers } from "./prisma/generated/type-graphql";
 import { CustomAppointmentsResolver } from "./src/resolvers/CustomAppointmentsResolver";
 
+import pgPool from "./src/db/db"
+
 async function startApolloServer() {
     const app = express();
     const httpServer = http.createServer(app);
@@ -96,6 +98,37 @@ async function startApolloServer() {
     server.applyMiddleware({app});
     await new Promise<void>(resolve => httpServer.listen({port: 4000}, resolve));
     console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`);
+
+    /////////////////////////////////////////////////////////////////
+    //testing pg subscription
+    await pgPool.connect((err, client) =>{
+        // Listen for all pg_notify channel messages
+        if(err) {
+            console.log("Error connecting Postgres-pg instance",err)
+        } else {
+            console.log("client",client)
+            client.on('notification', function(msg) {
+                console.log("notification")
+                console.log("msg.payload", msg.payload)
+                // if (typeof msg.payload === "string") {
+                //     let payload = JSON.parse(msg.payload);
+                // }
+
+            });
+
+            // Designate which channels we are listening on. Add additional channels with multiple lines.
+            client.query('LISTEN new_order');
+        }
+    })
+
+    //precisa do `wal_level` >= logical configurado no postgres
+    // await pg.subscribe('insert', (row, info) => {
+    //     console.log("subscriber called")
+    //     console.log("row", row)
+    //     console.log("info", info)
+    //     console.log("--")
+    //     console.log("--")
+    // })
 }
 
 startApolloServer().then(r => {

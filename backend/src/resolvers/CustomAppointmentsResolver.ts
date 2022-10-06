@@ -51,8 +51,15 @@ export class CustomAppointmentsResolver {
         //     ...(_count && transformCountFieldIntoSelectRelationsCount(_count)),
         // });
     }
-
-
+    //
+    // @Subscription({
+    //     subscribe: (rootValue, args, context, info) => {
+    //         getPrismaFromContext(context).
+    //     }
+    // })
+    // observeDb(@Ctx() ctx: any, @Root() notificationPayload: NotificationPayload) {
+    //
+    // }
 
 
     @Mutation(() => String)
