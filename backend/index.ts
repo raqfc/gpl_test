@@ -15,14 +15,17 @@ import { PrismaClient } from "@prisma/client";
 
 import { PubSub } from 'graphql-subscriptions';
 
-import { resolvers } from "./prisma/generated/type-graphql";
+import { resolvers, User } from "./prisma/generated/type-graphql";
 import {
-    APPOINTMENTS_TOPIC,
-    CustomAppointmentsResolver,
-    NotificationPayload
-} from "./src/resolvers/CustomAppointmentsResolver";
+    ObserveUserSubscriptionResolver,
+} from "./src/resolvers/subscriptions/User/ObserveUserSubscriptionResolver";
 
 import pgPool from "./src/db/db"
+import {
+    UserUpdatedNotificationPayload
+} from "./src/resolvers/subscriptions/User/args/UserUpdatedNotificationPayload";
+import { APPOINTMENTS_TOPIC } from "./src/resolvers/subscriptions/SubscriptionTopics";
+import { DatabaseTriggerListener } from "./src/db/DatabaseTriggerListener";
 
 async function startApolloServer() {
     const app = express();
@@ -31,7 +34,7 @@ async function startApolloServer() {
     const pubSub = new PubSub();
 
     const schema = await buildSchema({
-        resolvers: [CustomAppointmentsResolver, ...resolvers],
+        resolvers: [ObserveUserSubscriptionResolver, ...resolvers],
         emitSchemaFile: path.resolve(__dirname, 'schema.gql'),
         pubSub: pubSub
     });
@@ -45,7 +48,7 @@ async function startApolloServer() {
         schema,
         onConnect: async (ctx) => {
             console.log('onConnect!');
-            return { extended: 'context' };
+            return {extended: 'context'};
         },
         onDisconnect(ctx, code, reason) {
             console.log('onDisconnect!');
@@ -92,23 +95,12 @@ async function startApolloServer() {
 
     /////////////////////////////////////////////////////////////////
     //testing pg subscription
-    await pgPool.connect((err, client) => {
+    pgPool.connect((err, client) => {
         // Listen for all pg_notify channel messages
-        if(err) {
-            console.log("Error connecting Postgres-pg instance",err)
+        if (err) {
+            console.log("Error connecting Postgres-pg instance", err);
         } else {
-            client.on('notification', function(msg) {
-                console.log("notification")
-                console.log("msg.payload", msg.payload)
-                // if (typeof msg.payload === "string") {
-                //     let payload = JSON.parse(msg.payload);
-                // }
-                const payload: NotificationPayload = { message: "att vinda do postgres" };
-                pubSub.publish(APPOINTMENTS_TOPIC, payload)
-            });
-
-            // Designate which channels we are listening on. Add additional channels with multiple lines.
-            client.query('LISTEN new_user');
+            new DatabaseTriggerListener(client, pubSub)
         }
     })
 

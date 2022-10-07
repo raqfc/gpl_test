@@ -8,6 +8,7 @@ const CREATE_USER = gql`
         createUser(name: $name) {
             id
             name
+           
         }
     }
 `

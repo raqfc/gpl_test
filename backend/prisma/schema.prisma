@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/db-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 generator typegraphql {
@@ -11,39 +11,40 @@ generator typegraphql {
 }
 
 datasource postgres {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-    id                       String            @id @default(uuid())
-    email                    String            @unique
-    name                     String?
-    role                     Role              @default(USER)
-    supervisedAppointments   Appointment[]     @relation("supervisor")
-    appointments             Appointment[]     @relation("customer")
+  id                     String        @id @default(uuid())
+  email                  String        @unique
+  name                   String?
+  role                   Role          @default(USER)
+  supervisedAppointments Appointment[] @relation("supervisor")
+  appointments           Appointment[] @relation("customer")
 }
 
 model Appointment {
-    id             String       @id @default(uuid())
-    supervisor     User         @relation("supervisor", fields: [supervisorId], references: [id])
-    supervisorId   String
-    customer       User         @relation("customer", fields: [customerId], references: [id])
-    customerId     String
-    proceduresIds  Procedure[]
-    startsAt       DateTime
-    endsAt         DateTime
- }
+  ///id do appointment
+  id            String      @id @default(uuid())
+  supervisor    User        @relation("supervisor", fields: [supervisorId], references: [id])
+  supervisorId  String
+  customer      User        @relation("customer", fields: [customerId], references: [id])
+  customerId    String
+  proceduresIds Procedure[]
+  startsAt      DateTime
+  endsAt        DateTime
+}
 
- model Procedure {
-    id            String         @id @default(uuid())
-    name          String
-    idProc        String
-    appointments  Appointment[]
- }
+model Procedure {
+  id           String        @id @default(uuid())
+  name         String
+  idProc       String
+  appointments Appointment[]
+}
 
 enum Role {
-    USER
-    SUPERVISOR
-    CUSTOMER
+  USER
+  SUPERVISOR
+  CUSTOMER
 }

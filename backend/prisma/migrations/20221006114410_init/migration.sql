@@ -1,8 +1,8 @@
 /*
   Warnings:
 
-  - Added the required column `customerId` to the `Appointment` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `supervisorId` to the `Appointment` table without a default value. This is not possible if the table is not empty.
+  - Added the required column `customerId` to the `User` table without a default value. This is not possible if the table is not empty.
+  - Added the required column `supervisorId` to the `User` table without a default value. This is not possible if the table is not empty.
 
 */
 -- AlterTable

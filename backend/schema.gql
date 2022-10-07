@@ -30,6 +30,8 @@ type Appointment {
   customer: User!
   customerId: String!
   endsAt: DateTime!
+
+  """id do appointment"""
   id: String!
   proceduresIds(cursor: ProcedureWhereUniqueInput, distinct: [ProcedureScalarFieldEnum!], orderBy: [ProcedureOrderByWithRelationInput!], skip: Int, take: Int, where: ProcedureWhereInput): [Procedure!]!
   startsAt: DateTime!
@@ -477,7 +479,6 @@ type Mutation {
   deleteOneAppointment(where: AppointmentWhereUniqueInput!): Appointment
   deleteOneProcedure(where: ProcedureWhereUniqueInput!): Procedure
   deleteOneUser(where: UserWhereUniqueInput!): User
-  test: String!
   updateManyAppointment(data: AppointmentUpdateManyMutationInput!, where: AppointmentWhereInput): AffectedRowsOutput!
   updateManyProcedure(data: ProcedureUpdateManyMutationInput!, where: ProcedureWhereInput): AffectedRowsOutput!
   updateManyUser(data: UserUpdateManyMutationInput!, where: UserWhereInput): AffectedRowsOutput!
@@ -924,7 +925,12 @@ input StringWithAggregatesFilter {
 }
 
 type Subscription {
-  observeManyAppointments: String!
+  observeUser(id: String!): UpdatedUser!
+}
+
+type UpdatedUser {
+  message: Int
+  user: User
 }
 
 type User {
