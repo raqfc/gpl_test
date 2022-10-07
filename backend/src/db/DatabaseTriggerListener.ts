@@ -6,6 +6,7 @@ import { User } from "../../prisma/generated/type-graphql";
 import { APPOINTMENTS_TOPIC, USERS_TOPIC } from "../resolvers/subscriptions/SubscriptionTopics";
 import { PubSubEngine } from "graphql-subscriptions/dist/pubsub-engine";
 import { databaseTriggers, NEW_USER_TRIGGER, UPDATED_USER_TRIGGER } from "./DatabaseTriggers";
+import { UserModel } from "../models/UserModel";
 
 export class DatabaseTriggerListener {
     client: PoolClient
@@ -14,9 +15,10 @@ export class DatabaseTriggerListener {
     constructor(client: PoolClient, pubSub: PubSubEngine) {
         this.client = client;
         this.pubSub = pubSub;
+        this.startListener()
     }
 
-    async startListener() {
+    startListener() {
         this.client.on('notification', (msg) => {
             console.log("notification");
             //EXAMPLE
@@ -32,12 +34,12 @@ export class DatabaseTriggerListener {
                 const payloadInfo = JSON.parse(msg.payload);
                 switch (msg.channel) {
                     case NEW_USER_TRIGGER:
-                        const newUser: UserUpdatedNotificationPayload = {user: new User(payloadInfo)};
-                        this.pubSub.publish(USERS_TOPIC, newUser);
+                        const newUser: UserUpdatedNotificationPayload = {user: new UserModel(payloadInfo)};
+                        this.pubSub.publish(USERS_TOPIC, newUser).then(r => {});
                         break;
                     case UPDATED_USER_TRIGGER:
-                        const updateUser: UserUpdatedNotificationPayload = {user: new User(payloadInfo)};
-                        this.pubSub.publish(`${USERS_TOPIC}-${updateUser.user?.id}`, updateUser);
+                        const updateUser: UserUpdatedNotificationPayload = {user: new UserModel(payloadInfo)};
+                        this.pubSub.publish(`${USERS_TOPIC}-${updateUser.user?.id}`, updateUser).then(r => {});
                         break;
                     default:
                         break;
@@ -45,14 +47,14 @@ export class DatabaseTriggerListener {
             }
         });
 
-        await this.activateTriggers()
+        this.activateTriggers()
     }
 
-    async activateTriggers() {
+    activateTriggers() {
         // Designate which channels we are listening on. Add additional channels with multiple lines.
         for(const trigger of databaseTriggers) {
-            let result = await this.client.query(`LISTEN ${trigger}`);
-            console.log(result)
+            console.log(`listening for trigger: ${trigger}`)
+            this.client.query(`LISTEN ${trigger}`).then(() => {});
         }
     }
 }

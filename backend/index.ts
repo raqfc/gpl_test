@@ -27,6 +27,7 @@ import {
 import { APPOINTMENTS_TOPIC } from "./src/resolvers/subscriptions/SubscriptionTopics";
 import { DatabaseTriggerListener } from "./src/db/DatabaseTriggerListener";
 
+
 async function startApolloServer() {
     const app = express();
     const httpServer = http.createServer(app);

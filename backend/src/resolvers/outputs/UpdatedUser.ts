@@ -8,7 +8,7 @@ export class UpdatedUser {
     })
     user?: User;
 
-    @TypeGraphQL.Field(_type => TypeGraphQL.Int, {
+    @TypeGraphQL.Field(_type => String, {
         nullable: true
     })
     message?: string;

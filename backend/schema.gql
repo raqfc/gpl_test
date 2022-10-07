@@ -925,11 +925,12 @@ input StringWithAggregatesFilter {
 }
 
 type Subscription {
+  observeNewUser: UpdatedUser!
   observeUser(id: String!): UpdatedUser!
 }
 
 type UpdatedUser {
-  message: Int
+  message: String
   user: User
 }
 

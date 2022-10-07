@@ -3,6 +3,7 @@ export const UPDATED_USER_TRIGGER = "updated_user"
 
 
 export const databaseTriggers: String[] = [
-    NEW_USER_TRIGGER
+    NEW_USER_TRIGGER,
+    UPDATED_USER_TRIGGER
 ]
 

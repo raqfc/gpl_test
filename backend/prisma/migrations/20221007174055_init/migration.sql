@@ -14,6 +14,8 @@ CREATE TABLE "User" (
 -- CreateTable
 CREATE TABLE "Appointment" (
     "id" TEXT NOT NULL,
+    "supervisorId" TEXT NOT NULL,
+    "customerId" TEXT NOT NULL,
     "startsAt" TIMESTAMP(3) NOT NULL,
     "endsAt" TIMESTAMP(3) NOT NULL,
 
@@ -43,6 +45,12 @@ CREATE UNIQUE INDEX "_AppointmentToProcedure_AB_unique" ON "_AppointmentToProced
 
 -- CreateIndex
 CREATE INDEX "_AppointmentToProcedure_B_index" ON "_AppointmentToProcedure"("B");
+
+-- AddForeignKey
+ALTER TABLE "Appointment" ADD CONSTRAINT "Appointment_supervisorId_fkey" FOREIGN KEY ("supervisorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Appointment" ADD CONSTRAINT "Appointment_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_AppointmentToProcedure" ADD CONSTRAINT "_AppointmentToProcedure_A_fkey" FOREIGN KEY ("A") REFERENCES "Appointment"("id") ON DELETE CASCADE ON UPDATE CASCADE;

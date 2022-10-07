@@ -19,6 +19,16 @@ export class ObserveUserSubscriptionResolver {
             message: !notificationPayload.user ? "error obtaining user" : "success"
         }
     }
+    @Subscription({
+        topics: USERS_TOPIC
+    })
+    observeNewUser(@Ctx() ctx: any, @PubSub() pubSub: PubSubEngine, @Root() notificationPayload: UserUpdatedNotificationPayload): UpdatedUser {
+        console.log("notificationPayload", notificationPayload)
+        return {
+            user: notificationPayload.user,
+            message: !notificationPayload.user ? "error obtaining user" : "success"
+        }
+    }
 
     // @Mutation(() => String)
     // async test(@Ctx() ctx: any,  @PubSub(APPOINTMENTS_TOPIC) publish: Publisher<NotificationPayload>,) {
