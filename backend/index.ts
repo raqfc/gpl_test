@@ -24,7 +24,7 @@ import { applyMiddleware } from "graphql-middleware";
 
 import admin from "firebase-admin";
 
-import { AuthMiddleware } from "./src/middlewares/AuthMiddleware";
+import { AuthMiddleware } from "./src/middlewares/auth/AuthMiddleware";
 import { getAuth } from "firebase-admin/lib/auth";
 import { getApplicationDefault } from "firebase-admin/lib/app/credential-internal";
 
@@ -71,7 +71,13 @@ async function startApolloServer() {
         schema,
         onConnect: async (ctx) => {
             console.log('onConnect!');
-            return {extended: 'context'};
+            const validatedToken = await authMiddleware.checkValidToken(ctx.connectionParams?.Authorization as string|null)
+            if (!validatedToken) {
+                //todo descobrir como deixar retornar false
+                // return false//new Error or('Auth token missing!');
+            } else {
+                return {extended: 'context'};
+            }
         },
         onDisconnect(ctx, code, reason) {
             console.log('onDisconnect!');
