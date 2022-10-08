@@ -26,7 +26,8 @@ import {
 } from "./src/resolvers/subscriptions/User/args/UserUpdatedNotificationPayload";
 import { APPOINTMENTS_TOPIC } from "./src/resolvers/subscriptions/SubscriptionTopics";
 import { DatabaseTriggerListener } from "./src/db/DatabaseTriggerListener";
-
+import { makeExecutableSchema } from '@graphql-tools/schema'
+import { applyMiddleware } from "graphql-middleware";
 
 async function startApolloServer() {
     const app = express();
@@ -34,11 +35,25 @@ async function startApolloServer() {
 
     const pubSub = new PubSub();
 
-    const schema = await buildSchema({
+    let schema = await buildSchema({
         resolvers: [ObserveUserSubscriptionResolver, ...resolvers],
         emitSchemaFile: path.resolve(__dirname, 'schema.gql'),
         pubSub: pubSub
     });
+
+
+    const logInput = async (resolve: any, root: any, args: any, context: any, info: any) => {
+        //info
+        console.log(`1. logInput resolve: ${JSON.stringify(resolve)}`) //resolver
+        // context.authToken
+        console.log(`1. logInput info: ${JSON.stringify(info)}`) //which function is being called
+        const result = await resolve(root, args, context, info)
+        console.log(`5. logInput`)
+        return result
+    }
+
+    schema = applyMiddleware(schema, logInput)
+
 
     const wsServer = new WebSocketServer({
         server: httpServer,
@@ -69,7 +84,8 @@ async function startApolloServer() {
         schema,
         csrfPrevention: true,
         cache: 'bounded',
-        context: () => ({
+        context: ({req, res}) => ({
+            authToken: req.headers.authorization,
             prisma,
             pubSub
         }),
