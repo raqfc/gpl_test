@@ -1,5 +1,7 @@
 package-lock.json
 .env
+firebase_admin_account.json
+firestore.rules
 */generated
 # Logs
 logs

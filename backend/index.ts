@@ -15,19 +15,18 @@ import { PrismaClient } from "@prisma/client";
 
 import { PubSub } from 'graphql-subscriptions';
 
-import { resolvers, User } from "./prisma/generated/type-graphql";
-import {
-    ObserveUserSubscriptionResolver,
-} from "./src/resolvers/subscriptions/User/ObserveUserSubscriptionResolver";
+import { resolvers } from "./prisma/generated/type-graphql";
+import { ObserveUserSubscriptionResolver, } from "./src/resolvers/subscriptions/User/ObserveUserSubscriptionResolver";
 
 import pgPool from "./src/db/db"
-import {
-    UserUpdatedNotificationPayload
-} from "./src/resolvers/subscriptions/User/args/UserUpdatedNotificationPayload";
-import { APPOINTMENTS_TOPIC } from "./src/resolvers/subscriptions/SubscriptionTopics";
 import { DatabaseTriggerListener } from "./src/db/DatabaseTriggerListener";
-import { makeExecutableSchema } from '@graphql-tools/schema'
 import { applyMiddleware } from "graphql-middleware";
+
+import admin from "firebase-admin";
+
+import { AuthMiddleware } from "./src/middlewares/AuthMiddleware";
+import { getAuth } from "firebase-admin/lib/auth";
+import { getApplicationDefault } from "firebase-admin/lib/app/credential-internal";
 
 async function startApolloServer() {
     const app = express();
@@ -41,18 +40,26 @@ async function startApolloServer() {
         pubSub: pubSub
     });
 
+    //init firebaseAdmin
+    const serviceAccount = require(process.env.GOOGLE_APPLICATION_CREDENTIALS ?? '')
+    const firebaseApp = admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: "https://volandevjw-default-rtdb.firebaseio.com"
+    });
 
-    const logInput = async (resolve: any, root: any, args: any, context: any, info: any) => {
-        //info
-        console.log(`1. logInput resolve: ${JSON.stringify(resolve)}`) //resolver
-        // context.authToken
-        console.log(`1. logInput info: ${JSON.stringify(info)}`) //which function is being called
-        const result = await resolve(root, args, context, info)
-        console.log(`5. logInput`)
-        return result
-    }
+    const authMiddleware = new AuthMiddleware(firebaseApp.auth())
 
-    schema = applyMiddleware(schema, logInput)
+    // const logInput = async (resolve: any, root: any, args: any, context: any, info: any) => {
+    //     //info
+    //     console.log(`1. logInput resolve: ${JSON.stringify(resolve)}`) //resolver
+    //     // context.authToken
+    //     console.log(`1. logInput info: ${JSON.stringify(info)}`) //which function is being called
+    //     const result = await resolve(root, args, context, info)
+    //     console.log(`5. logInput`)
+    //     return result
+    // }
+
+    schema = applyMiddleware(schema, authMiddleware.middleware)
 
 
     const wsServer = new WebSocketServer({
