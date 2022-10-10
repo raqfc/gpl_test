@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/gpl_test.iml" filepath="$PROJECT_DIR$/.idea/gpl_test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../volan_admin/.idea/volan_admin.iml" filepath="$PROJECT_DIR$/../volan_admin/.idea/volan_admin.iml" />
     </modules>
   </component>
 </project>

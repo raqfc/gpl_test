@@ -20,7 +20,7 @@ import { ObserveUserSubscriptionResolver, } from "./src/resolvers/subscriptions/
 
 import pgPool from "./src/db/db"
 import { DatabaseTriggerListener } from "./src/db/DatabaseTriggerListener";
-import { applyMiddleware } from "graphql-middleware";
+import { applyMiddleware, middleware } from "graphql-middleware";
 
 import admin from "firebase-admin";
 
@@ -59,7 +59,7 @@ async function startApolloServer() {
     //     return result
     // }
 
-    schema = applyMiddleware(schema, authMiddleware.middleware)
+    schema = applyMiddleware(schema, authMiddleware.shieldMiddleware)
 
 
     const wsServer = new WebSocketServer({
