@@ -59,7 +59,7 @@ async function startApolloServer() {
     //     return result
     // }
 
-    schema = applyMiddleware(schema, authMiddleware.shieldMiddleware)
+    schema = applyMiddleware(schema, authMiddleware.middleware)
 
 
     const wsServer = new WebSocketServer({
