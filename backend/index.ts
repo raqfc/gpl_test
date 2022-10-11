@@ -20,13 +20,12 @@ import { ObserveUserSubscriptionResolver, } from "./src/resolvers/subscriptions/
 
 import pgPool from "./src/db/db"
 import { DatabaseTriggerListener } from "./src/db/DatabaseTriggerListener";
-import { applyMiddleware, middleware } from "graphql-middleware";
+import { applyMiddleware } from "graphql-middleware";
 
 import admin from "firebase-admin";
 
 import { AuthMiddleware } from "./src/middlewares/auth/AuthMiddleware";
-import { getAuth } from "firebase-admin/lib/auth";
-import { getApplicationDefault } from "firebase-admin/lib/app/credential-internal";
+import { generateAuthMiddlewareSchemaHelper } from "./src/helpers/GenerateAuthMiddlewareSchemaHelper";
 
 async function startApolloServer() {
     const app = express();
@@ -59,7 +58,8 @@ async function startApolloServer() {
     //     return result
     // }
 
-    schema = applyMiddleware(schema, authMiddleware.middleware)
+    const middlewareSchema = await generateAuthMiddlewareSchemaHelper(authMiddleware)
+    schema = applyMiddleware(schema, middlewareSchema)
 
 
     const wsServer = new WebSocketServer({

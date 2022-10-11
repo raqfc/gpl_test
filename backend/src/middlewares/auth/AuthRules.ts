@@ -115,11 +115,11 @@ export const moduleRules: ModuleRules = {
 
 type CalledTableAction = {
     isWrite: boolean,
-    table: TableRules | null
+    table: TableRules
 }
 
 //isWrite, tableRules
-export function fieldNameToTable(fieldName: string): CalledTableAction {
+export function fieldNameToTable(fieldName: string): CalledTableAction|null {
     switch (fieldName) {
         case "aggregateUser":
             return {
@@ -195,11 +195,7 @@ export function fieldNameToTable(fieldName: string): CalledTableAction {
             }
 
     }
-    return {
-        isWrite:
-            true,
-        table: null
-    }
+    return null
 }
 
 export const rules: Rules = {
