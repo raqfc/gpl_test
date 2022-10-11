@@ -32,7 +32,7 @@ async function findObjects(objectsNames: string[], valueToAdd: any,  fileStream:
 
     //read line by line
     for await (const line of rl) {
-        //verify if the current line is the init of an type block of the desired name
+        //verify if the current line is the init of a type block of the desired name
         for (const name of objectsNames) {
             if(line.match(`type ${name} {`)) {//eg. if line matches 'type Query {'
                 foundStart = true
