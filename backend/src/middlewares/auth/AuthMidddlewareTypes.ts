@@ -1,12 +1,10 @@
 import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 
-export type AuthToken = DecodedIdToken & {
+export type AuthToken = {
     jw: TokenPermissions,
-    // name: string, //userName
-    // aud: string
-    // user_id: string
-    // exp: string
-    // uid: string
+    aud: string,
+    name: string,
+    uid: string
 }
 
 export type TokenPermissions = {
@@ -98,4 +96,15 @@ export enum ACCESS_MODULE {
 
 
     NONE = ""
+}
+
+export enum ACCESS_PROFILE {
+    ADMIN = "a",
+    ANESTHETIST = "b",
+    SCHEDULE_MANAGER = "c",
+    SCHEDULER = "d",
+    BILLING_MANAGER = "e",
+    BILLER = "f",
+    RESIDENT = "g",
+    FORM_MANAGER = "h",
 }

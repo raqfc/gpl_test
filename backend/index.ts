@@ -11,8 +11,6 @@ import http from 'http';
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 
-import { PrismaClient } from "@prisma/client";
-
 import { PubSub } from 'graphql-subscriptions';
 
 import { resolvers } from "./prisma/generated/type-graphql";
@@ -26,6 +24,8 @@ import admin from "firebase-admin";
 
 import { AuthMiddleware } from "./src/middlewares/auth/AuthMiddleware";
 import { generateAuthMiddlewareSchemaHelper } from "./src/helpers/GenerateAuthMiddlewareSchemaHelper";
+import prisma from "./src/client";
+import { FirebaseIAuth } from "./src/middlewares/auth/FirebaseIAuth";
 
 async function startApolloServer() {
     const app = express();
@@ -46,8 +46,8 @@ async function startApolloServer() {
         databaseURL: "https://volandevjw-default-rtdb.firebaseio.com"
     });
 
-    const authMiddleware = new AuthMiddleware(firebaseApp.auth())
-    
+    const authMiddleware = new AuthMiddleware(new FirebaseIAuth(firebaseApp.auth()))
+
     const middlewareSchema = await generateAuthMiddlewareSchemaHelper(authMiddleware)
     schema = applyMiddleware(schema, middlewareSchema)
 
@@ -80,8 +80,6 @@ async function startApolloServer() {
             return ctx;
         },
     }, wsServer);
-
-    const prisma = new PrismaClient();
 
     const server = new ApolloServer({
         schema,

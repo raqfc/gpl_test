@@ -1,15 +1,14 @@
-import { auth } from "firebase-admin";
 import { ACCESS_ACTION, ACCESS_MODULE, AuthToken, RequiredPermissions, TokenPermissions } from "./AuthMidddlewareTypes";
 import { fieldNameToTable, moduleRules } from "./AuthRules";
+import { IAuth } from "./IAuth";
 
 const crc32 = require('fast-crc32c');
 
-import Auth = auth.Auth;
 
 export class AuthMiddleware {
-    mAuth: Auth
+    private mAuth: IAuth
 
-    constructor(auth: Auth) {
+    constructor(auth: IAuth) {
         this.mAuth = auth
     }
 
@@ -22,7 +21,7 @@ export class AuthMiddleware {
     async checkValidToken(token: string | null): Promise<AuthToken | null> {
         if (token) {
             try {
-                return (await this.mAuth.verifyIdToken(token)) as AuthToken
+                return (await this.mAuth.verifyIdToken(token))
             } catch (e) {
                 console.log("Error parsing authToken")
                 console.log("e ", e)
@@ -119,8 +118,8 @@ export class AuthMiddleware {
                 moduleRules[module][action].includes(el)
             })
 
-            if (hasProfile && action.toLowerCase().match("own")) {//beyond having the permission, the data must belong to the user
-                hasProfile = authToken.auth.uid === data.anesthetistId
+            if (hasProfile && action.toLowerCase().includes("own")) {//beyond having the permission, the data must belong to the user
+                hasProfile = authToken.uid === data.anesthetistId
             }
 
             if (hasProfile && action === ACCESS_ACTION.MANAGE_FILIAIS) {//beyond having the permission, the data must belong to the matriz
