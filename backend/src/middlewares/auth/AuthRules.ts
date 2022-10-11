@@ -1,4 +1,4 @@
-import { ACCESS_ACTION, ACCESS_MODULE, ModuleRules, Rules, TableRules } from "./AuthMidddlewareTypes";
+import { ACCESS_ACTION, ACCESS_MODULE, CalledTableAction, ModuleRules, Rules } from "./AuthMidddlewareTypes";
 
 export const moduleRules: ModuleRules = {
     "eventsExports": {
@@ -112,14 +112,7 @@ export const moduleRules: ModuleRules = {
     }
 };
 
-
-type CalledTableAction = {
-    isWrite: boolean,
-    table: TableRules
-}
-
-//isWrite, tableRules
-export function fieldNameToTable(fieldName: string): CalledTableAction|null {
+export function fieldNameToTable(fieldName: string): CalledTableAction | null {
     switch (fieldName) {
         case "aggregateUser":
             return {

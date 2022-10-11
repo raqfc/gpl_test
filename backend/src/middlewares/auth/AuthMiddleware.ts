@@ -13,7 +13,7 @@ export class AuthMiddleware {
         this.mAuth = auth
     }
 
-    jwCrc32c(input: string): string {
+    private jwCrc32c(input: string): string {
         const tmp = crc32.calculate(input).toString(16);
         const s = tmp.padStart(8, '0').match(/.{1,2}/g);
         return s.reverse().join("").toString(16).toUpperCase();
@@ -59,11 +59,11 @@ export class AuthMiddleware {
 
     }
 
-    checkPermissions(data: any, module: ACCESS_MODULE, permissions: RequiredPermissions, token: AuthToken | null): boolean {
+    private checkPermissions(data: any, module: ACCESS_MODULE, permissions: RequiredPermissions, token: AuthToken | null): boolean {
         if (Array.isArray(data)) {
             for (const entry of data) {
                 if (!this.hasPermissions(entry, module, permissions, token))
-                    return false
+                    return false //todo, if client doesnt have auth to get 1 item, return others or error??
             }
             return true
         } else {
@@ -75,21 +75,21 @@ export class AuthMiddleware {
         return authToken != null && authToken.jw.type.adm
     }
 
-    companyCanById(userTokenPermissions: TokenPermissions, companyId: string, module: string, action: string): boolean {
+    private companyCanById(userTokenPermissions: TokenPermissions, companyId: string, module: string, action: string): boolean {
         return !companyId || userTokenPermissions.c[this.jwCrc32c(companyId)]?.some((el) => {
             moduleRules[module][action].includes(el)
         });
     }
 
-    belongsToCompany(userTokenPermissions: TokenPermissions, data: any) {
+    private belongsToCompany(userTokenPermissions: TokenPermissions, data: any) {
         return !data.companyId || (userTokenPermissions.c[this.jwCrc32c(data.companyId)] || []).length >= 0;
     }
 
-    preCheckPermissions(module: ACCESS_MODULE, permissions: RequiredPermissions, token: AuthToken | null): boolean {
+    private preCheckPermissions(module: ACCESS_MODULE, permissions: RequiredPermissions, token: AuthToken | null): boolean {
         return this.isAdmin(token) || !(permissions.denyAll || (permissions.allowLogged && token == null) || (!permissions.allowAll && !token))
     }
 
-    hasPermissions(data: any, module: ACCESS_MODULE, permissions: RequiredPermissions, token: AuthToken | null): boolean {
+    private hasPermissions(data: any, module: ACCESS_MODULE, permissions: RequiredPermissions, token: AuthToken | null): boolean {
         if (this.isAdmin(token)) {
             return true
         }
@@ -108,7 +108,7 @@ export class AuthMiddleware {
         return this.hasAnyPermissions(data, token, permissions.actions, module)
     }
 
-    hasAnyPermissions(data: any, authToken: AuthToken, actions: ACCESS_ACTION[], module: ACCESS_MODULE): boolean {
+    private hasAnyPermissions(data: any, authToken: AuthToken, actions: ACCESS_ACTION[], module: ACCESS_MODULE): boolean {
         const companyId = data.companyId ?? (() => {
             return false
         })()

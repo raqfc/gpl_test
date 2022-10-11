@@ -30,6 +30,10 @@ export type ModuleRules = {
 export type Rules = {
     [module: string]: TableRules
 }
+export type CalledTableAction = {
+    isWrite: boolean,
+    table: TableRules
+}
 
 export type ActionProfiles = {
     [action: string]: string[]//array of profiles that can perform

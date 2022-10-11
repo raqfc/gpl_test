@@ -47,17 +47,7 @@ async function startApolloServer() {
     });
 
     const authMiddleware = new AuthMiddleware(firebaseApp.auth())
-
-    // const logInput = async (resolve: any, root: any, args: any, context: any, info: any) => {
-    //     //info
-    //     console.log(`1. logInput resolve: ${JSON.stringify(resolve)}`) //resolver
-    //     // context.authToken
-    //     console.log(`1. logInput info: ${JSON.stringify(info)}`) //which function is being called
-    //     const result = await resolve(root, args, context, info)
-    //     console.log(`5. logInput`)
-    //     return result
-    // }
-
+    
     const middlewareSchema = await generateAuthMiddlewareSchemaHelper(authMiddleware)
     schema = applyMiddleware(schema, middlewareSchema)
 
