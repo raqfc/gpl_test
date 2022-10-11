@@ -6,10 +6,7 @@ export async function generateAuthMiddlewareSchemaHelper(authMiddleware: AuthMid
     try {
         const fileStream = fs.createReadStream(__dirname+ '/../../schema.gql', { encoding: 'utf8' });
 
-        let middlewareSchema: any = await findObjects(["Query", "Mutation", "Subscription"], authMiddleware.middleware, fileStream)
-        console.log(middlewareSchema);
-
-        return middlewareSchema
+        return await findObjects(["Query", "Mutation", "Subscription"], authMiddleware.middleware, fileStream)
     } catch (err) {
         console.log(err);
     }

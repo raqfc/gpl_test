@@ -1,4 +1,5 @@
 import { ACCESS_ACTION, ACCESS_MODULE, CalledTableAction, ModuleRules, Rules } from "./AuthMidddlewareTypes";
+// import { GTableMethods } from '../../helpers/generated/GTableMethods'
 
 export const moduleRules: ModuleRules = {
     "eventsExports": {
@@ -112,82 +113,16 @@ export const moduleRules: ModuleRules = {
     }
 };
 
-export function fieldNameToTable(fieldName: string): CalledTableAction | null {
-    switch (fieldName) {
-        case "aggregateUser":
-            return {
-                isWrite:
-                    false,
-                table: rules["company_users"]
-            }
-        case "createManyUser":
-            return {
-                isWrite:
-                    true,
-                table: rules["company_users"]
-            }
-        case "createOneUser":
-            return {
-                isWrite:
-                    true,
-                table: rules["company_users"]
-            }
-        case "deleteManyUser":
-            return {
-                isWrite:
-                    true,
-                table: rules["company_users"]
-            }
-        case "deleteOneUser":
-            return {
-                isWrite:
-                    true,
-                table: rules["company_users"]
-            }
-        case "findFirstUser":
-            return {
-                isWrite:
-                    false,
-                table: rules["company_users"]
-            }
-        case "users":
-            return {
-                isWrite:
-                    false,
-                table: rules["company_users"]
-            }
-        case "user":
-            return {
-                isWrite:
-                    false,
-                table: rules["company_users"]
-            }
-        case "groupByUser":
-            return {
-                isWrite:
-                    false,
-                table: rules["company_users"]
-            }
-        case "updateManyUser":
-            return {
-                isWrite:
-                    true,
-                table: rules["company_users"]
-            }
-        case "updateOneUser":
-            return {
-                isWrite:
-                    true,
-                table: rules["company_users"]
-            }
-        case "upsertOneUser":
-            return {
-                isWrite:
-                    true,
-                table: rules["company_users"]
-            }
+// const tableMethods = {
+//     ...GTableMethods,
+// }
 
-    }
+export function fieldNameToTable(fieldName: string): CalledTableAction | null {
+    // {
+    //     isWrite:
+    //         false,
+    //             table: rules["company_users"]
+    // }
     return null
 }
 

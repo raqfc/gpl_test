@@ -24,6 +24,7 @@ import admin from "firebase-admin";
 
 import { AuthMiddleware } from "./src/middlewares/auth/AuthMiddleware";
 import { generateAuthMiddlewareSchemaHelper } from "./src/helpers/GenerateAuthMiddlewareSchemaHelper";
+import { generatePrismaFieldNameToTable } from "./src/helpers/GeneratePrismaFieldNameToTable";
 import prisma from "./src/client";
 import { FirebaseIAuth } from "./src/middlewares/auth/FirebaseIAuth";
 
@@ -48,6 +49,7 @@ async function startApolloServer() {
 
     const authMiddleware = new AuthMiddleware(new FirebaseIAuth(firebaseApp.auth()))
 
+    await generatePrismaFieldNameToTable()
     const middlewareSchema = await generateAuthMiddlewareSchemaHelper(authMiddleware)
     schema = applyMiddleware(schema, middlewareSchema)
 

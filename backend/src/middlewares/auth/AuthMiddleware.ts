@@ -34,6 +34,7 @@ export class AuthMiddleware {
     middleware = async (resolve: any, root: any, args: any, context: any, info: any) => {
         const decodedAuthToken: AuthToken | null = await this.checkValidToken(context.authToken)
 
+        info.path.typename
         const calledTableAction = fieldNameToTable(info.fieldName)
         const tablePermissions = calledTableAction ? calledTableAction.isWrite ? calledTableAction.table.write : calledTableAction.table.read : null
         // rules

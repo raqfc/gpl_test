@@ -22,7 +22,20 @@ model User {
   role                   Role          @default(USER)
   supervisedAppointments Appointment[] @relation("supervisor")
   appointments           Appointment[] @relation("customer")
+  meta                   Meta
 }
+
+//type Meta {
+//    createdAt DateTime
+//    createdBy String
+//    createdByName String
+//    updatedAt DateTime
+//    updatedBy String
+//    updatedByName String
+//    deletedAt DateTime
+//    deletedBy String
+//   deletedByName String
+//}
 
 model Appointment {
   ///id do appointment
