@@ -33,63 +33,36 @@ export class AuthMiddleware {
 
     middleware = async (resolve: any, root: any, args: any, context: any, info: any) => {
         const decodedAuthToken: AuthToken | null = await this.checkValidToken(context.authToken)
+        const isWrite = info.operation.operation.toLowerCase() === 'mutation'
 
-        info.path.typename
-        const calledTableAction = fieldNameToTable(info.fieldName)
-        const tablePermissions = calledTableAction ? calledTableAction.isWrite ? calledTableAction.table.write : calledTableAction.table.read : null
-        // rules
-        if (calledTableAction && tablePermissions && !this.preCheckPermissions(calledTableAction.table.module, tablePermissions, decodedAuthToken)) { //pre checking to figure out with the client
-            return Error("Unauthorized")                                                                                                              //is already unauthorized, independent of the desired data
-        }
+        const tableRules = fieldNameToTable(info.fieldName)
+        const tablePermissions = tableRules ? (isWrite ? tableRules.write : tableRules.read) : null
 
-        console.log(`1. logInput info.path: `)
-        console.dir(info.path, {depth: null});
-        console.log(`2. logInput info.fieldName: ${info.fieldName} `) //which function is being called
+        console.log(`1. logInput info.fieldName: ${info.fieldName} `) //which function is being called
+        console.log(`2. logInput foundTable: ${tableRules?.table}`)
         console.log("------------------------")
 
-        const data = await resolve(root, args, context, info)
+        if (!tableRules || !tablePermissions || !this.hasPermissions(args, tableRules.module, tablePermissions, decodedAuthToken))
+            return Error("Unauthorized")
 
-        if (this.isAdmin(decodedAuthToken)) {
-            return data
-        } else if (calledTableAction && tablePermissions) {
-            return this.checkPermissions(data, calledTableAction.table.module, tablePermissions, decodedAuthToken) ? data : Error("Unauthorized")
-        } else {
-            return data //todo, in case no table is found in AuthRules, deny access by default
-        }
-
-    }
-
-    private checkPermissions(data: any, module: ACCESS_MODULE, permissions: RequiredPermissions, token: AuthToken | null): boolean {
-        if (Array.isArray(data)) {
-            for (const entry of data) {
-                if (!this.hasPermissions(entry, module, permissions, token))
-                    return false //todo, if client doesnt have auth to get 1 item, return others or error??
-            }
-            return true
-        } else {
-            return this.hasPermissions(data, module, permissions, token)
-        }
+        return await resolve(root, args, context, info)
     }
 
     isAdmin(authToken: AuthToken | null): boolean {
         return authToken != null && authToken.jw.type.adm
     }
 
-    private companyCanById(userTokenPermissions: TokenPermissions, companyId: string, module: string, action: string): boolean {
-        return !companyId || userTokenPermissions.c[this.jwCrc32c(companyId)]?.some((el) => {
+    private companyCanById(userTokenPermissions: TokenPermissions, companyId: string|null, module: string, action: string): boolean {
+        return companyId != null && userTokenPermissions.c[this.jwCrc32c(companyId)]?.some((el) => {
             moduleRules[module][action].includes(el)
         });
     }
 
-    private belongsToCompany(userTokenPermissions: TokenPermissions, data: any) {
-        return !data.companyId || (userTokenPermissions.c[this.jwCrc32c(data.companyId)] || []).length >= 0;
+    private belongsToCompany(userTokenPermissions: TokenPermissions, companyId: string | null) {
+        return companyId && (userTokenPermissions.c[this.jwCrc32c(companyId)] || []).length >= 0;
     }
 
-    private preCheckPermissions(module: ACCESS_MODULE, permissions: RequiredPermissions, token: AuthToken | null): boolean {
-        return this.isAdmin(token) || !(permissions.denyAll || (permissions.allowLogged && token == null) || (!permissions.allowAll && !token))
-    }
-
-    private hasPermissions(data: any, module: ACCESS_MODULE, permissions: RequiredPermissions, token: AuthToken | null): boolean {
+    private hasPermissions(args: any, module: ACCESS_MODULE, permissions: RequiredPermissions, token: AuthToken | null): boolean {
         if (this.isAdmin(token)) {
             return true
         }
@@ -99,32 +72,32 @@ export class AuthMiddleware {
             return true
         } else if (permissions.allowLogged && token != null) {
             return true
-        } else if (token?.jw && permissions.allowCompanyUsers && this.belongsToCompany(token!.jw, data)) {
+        } else if (token?.jw && permissions.allowCompanyUsers && this.belongsToCompany(token!.jw, args.companyId)) {
             return true
         } else if (!token) {
             return false
         }
 
-        return this.hasAnyPermissions(data, token, permissions.actions, module)
+        return this.hasAnyActionsPermissions(args, token, permissions.actions, module)
     }
 
-    private hasAnyPermissions(data: any, authToken: AuthToken, actions: ACCESS_ACTION[], module: ACCESS_MODULE): boolean {
-        const companyId = data.companyId ?? (() => {
+    private hasAnyActionsPermissions(args: any, authToken: AuthToken, actions: ACCESS_ACTION[], module: ACCESS_MODULE): boolean {
+        const companyId = args.companyId ?? (() => {
             return false
         })()
         const userTokenPermissions = authToken.jw
 
         for (const action of actions) {
-            let hasProfile = userTokenPermissions.c[this.jwCrc32c(data.matrizId)]?.some((el) => {
+            let hasProfile = userTokenPermissions.c[this.jwCrc32c(companyId)]?.some((el) => {
                 moduleRules[module][action].includes(el)
             })
 
             if (hasProfile && action.toLowerCase().includes("own")) {//beyond having the permission, the data must belong to the user
-                hasProfile = authToken.uid === data.anesthetistId
+                hasProfile = authToken.uid === args.anesthetistId
             }
 
-            if (hasProfile && action === ACCESS_ACTION.MANAGE_FILIAIS) {//beyond having the permission, the data must belong to the matriz
-                hasProfile = this.companyCanById(userTokenPermissions, data.matrizId, module, action)
+            if (hasProfile && action === ACCESS_ACTION.MANAGE_FILIAIS) {//beyond having the permission, the user must belong to the matriz
+                hasProfile = this.companyCanById(userTokenPermissions, args.matrizId, module, action)
             }
 
             if (hasProfile) {
@@ -136,25 +109,3 @@ export class AuthMiddleware {
 
 
 }
-//todo parse automatically table names from called function name
-// getTableName(fieldName: string): string|null {
-//     const separatedWords = separateWordsCamelCase(fieldName)
-//     const lastWord = inPlural(separatedWords[separatedWords.length - 1], 1)
-//
-//     if(rules[lastWord] != null) {
-//         return rules[lastWord].table
-//     }
-//
-//     if(separatedWords.length == 3)
-//
-//
-//
-//     return null
-// }
-//
-// parseFieldName(fieldName: string) {
-//     const tableName = this.getTableName(fieldName)
-//     if(!tableName) return
-//
-//
-// }

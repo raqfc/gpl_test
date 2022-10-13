@@ -23,7 +23,7 @@ export async function generatePrismaFieldNameToTable(): Promise<void> {
         }
 
         await fs.mkdir(__dirname + '/generated', {recursive: true})
-        await fs.writeFile(__dirname + '/generated/GTableMethods.js', `export const GTableMethods = ${JSON.stringify(tableMethods, null, 4)}`);
+        await fs.writeFile(__dirname + '/generated/GTableMethods.ts', `export const GTableMethods = ${JSON.stringify(tableMethods, null, 4)}`);
     } catch (err) {
         console.log(err);
     }

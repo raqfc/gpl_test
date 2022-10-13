@@ -1,5 +1,5 @@
-import { ACCESS_ACTION, ACCESS_MODULE, CalledTableAction, ModuleRules, Rules } from "./AuthMidddlewareTypes";
-// import { GTableMethods } from '../../helpers/generated/GTableMethods'
+import { ACCESS_ACTION, ACCESS_MODULE, ModuleRules, Rules, TableMethods, TableRules } from "./AuthMidddlewareTypes";
+import { GTableMethods } from '../../helpers/generated/GTableMethods'
 
 export const moduleRules: ModuleRules = {
     "eventsExports": {
@@ -113,16 +113,17 @@ export const moduleRules: ModuleRules = {
     }
 };
 
-// const tableMethods = {
-//     ...GTableMethods,
-// }
+const tableMethods: TableMethods = {
+    ...GTableMethods,
+    //declare here custom tableMethods
+}
 
-export function fieldNameToTable(fieldName: string): CalledTableAction | null {
-    // {
-    //     isWrite:
-    //         false,
-    //             table: rules["company_users"]
-    // }
+export function fieldNameToTable(fieldName: string): TableRules | null {
+    for (const table in tableMethods) {
+        if (tableMethods[table].includes(fieldName)) {
+            return rules[table]
+        }
+    }
     return null
 }
 

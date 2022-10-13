@@ -34,7 +34,7 @@ model User {
 //    updatedByName String
 //    deletedAt DateTime
 //    deletedBy String
-//   deletedByName String
+//    deletedByName String
 //}
 
 model Appointment {

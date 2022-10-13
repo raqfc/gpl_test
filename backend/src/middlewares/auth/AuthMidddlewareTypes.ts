@@ -37,12 +37,17 @@ export type ActionProfiles = {
     [action: string]: string[]//array of profiles that can perform
 }
 
+export type TableMethods = {
+    [table: string]: string[]
+}
+
 export type TableRules = {
     table: string
     module: ACCESS_MODULE
     write: RequiredPermissions
     read: RequiredPermissions
 }
+
 export type RequiredPermissions = {
     denyAll: boolean
     allowAll: boolean
