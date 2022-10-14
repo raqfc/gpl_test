@@ -48,6 +48,10 @@ export class AuthMiddleware {
         context.decodedAuthToken = decodedAuthToken
         context.table = tableRules
 
+        if(args.data) {
+            args.data.decodedAuthToken = decodedAuthToken
+        }
+
         return await resolve(root, args, context, info)
     }
 

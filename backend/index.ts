@@ -32,6 +32,7 @@ import { generatePrismaFieldNameToTable } from "./src/helpers/GeneratePrismaFiel
 import prisma from "./src/client";
 import { FirebaseIAuth } from "./src/middlewares/auth/FirebaseIAuth";
 import { MetaMiddleware } from "./src/middlewares/meta/MetaMiddleware";
+import client from "./src/client";
 
 
 // const testMiddleware: MiddlewareFn<any> = ({ context, info }, next) => {
@@ -68,7 +69,9 @@ async function startApolloServer() {
     const authMiddleware = new AuthMiddleware(new FirebaseIAuth(firebaseApp.auth()))
     const metaMiddleware = new MetaMiddleware()
 
+
     await generatePrismaFieldNameToTable()
+    client.$use(metaMiddleware.prismaMiddleware)
     const middlewareSchema = await generateAuthMiddlewareSchemaHelper([authMiddleware.middleware, metaMiddleware.middleware])
     schema = applyMiddleware(schema, ...middlewareSchema)
 

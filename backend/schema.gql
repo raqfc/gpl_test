@@ -13,6 +13,12 @@ type AggregateAppointment {
   _min: AppointmentMinAggregate
 }
 
+type AggregateMeta {
+  _count: MetaCountAggregate
+  _max: MetaMaxAggregate
+  _min: MetaMinAggregate
+}
+
 type AggregateProcedure {
   _count: ProcedureCountAggregate
   _max: ProcedureMaxAggregate
@@ -33,6 +39,7 @@ type Appointment {
 
   """id do appointment"""
   id: String!
+  meta: Meta
   proceduresIds(cursor: ProcedureWhereUniqueInput, distinct: [ProcedureScalarFieldEnum!], orderBy: [ProcedureOrderByWithRelationInput!], skip: Int, take: Int, where: ProcedureWhereInput): [Procedure!]!
   startsAt: DateTime!
   supervisor: User!
@@ -63,7 +70,7 @@ input AppointmentCountOrderByAggregateInput {
 input AppointmentCreateInput {
   customer: UserCreateNestedOneWithoutAppointmentsInput!
   endsAt: DateTime!
-  id: String
+  meta: MetaCreateNestedOneWithoutAppointmentInput
   proceduresIds: ProcedureCreateNestedManyWithoutAppointmentsInput
   startsAt: DateTime!
   supervisor: UserCreateNestedOneWithoutSupervisedAppointmentsInput!
@@ -121,8 +128,19 @@ input AppointmentCreateNestedManyWithoutSupervisorInput {
   createMany: AppointmentCreateManySupervisorInputEnvelope
 }
 
+input AppointmentCreateNestedOneWithoutMetaInput {
+  connect: AppointmentWhereUniqueInput
+  connectOrCreate: AppointmentCreateOrConnectWithoutMetaInput
+  create: AppointmentCreateWithoutMetaInput
+}
+
 input AppointmentCreateOrConnectWithoutCustomerInput {
   create: AppointmentCreateWithoutCustomerInput!
+  where: AppointmentWhereUniqueInput!
+}
+
+input AppointmentCreateOrConnectWithoutMetaInput {
+  create: AppointmentCreateWithoutMetaInput!
   where: AppointmentWhereUniqueInput!
 }
 
@@ -138,7 +156,15 @@ input AppointmentCreateOrConnectWithoutSupervisorInput {
 
 input AppointmentCreateWithoutCustomerInput {
   endsAt: DateTime!
-  id: String
+  meta: MetaCreateNestedOneWithoutAppointmentInput
+  proceduresIds: ProcedureCreateNestedManyWithoutAppointmentsInput
+  startsAt: DateTime!
+  supervisor: UserCreateNestedOneWithoutSupervisedAppointmentsInput!
+}
+
+input AppointmentCreateWithoutMetaInput {
+  customer: UserCreateNestedOneWithoutAppointmentsInput!
+  endsAt: DateTime!
   proceduresIds: ProcedureCreateNestedManyWithoutAppointmentsInput
   startsAt: DateTime!
   supervisor: UserCreateNestedOneWithoutSupervisedAppointmentsInput!
@@ -147,7 +173,7 @@ input AppointmentCreateWithoutCustomerInput {
 input AppointmentCreateWithoutProceduresIdsInput {
   customer: UserCreateNestedOneWithoutAppointmentsInput!
   endsAt: DateTime!
-  id: String
+  meta: MetaCreateNestedOneWithoutAppointmentInput
   startsAt: DateTime!
   supervisor: UserCreateNestedOneWithoutSupervisedAppointmentsInput!
 }
@@ -155,7 +181,7 @@ input AppointmentCreateWithoutProceduresIdsInput {
 input AppointmentCreateWithoutSupervisorInput {
   customer: UserCreateNestedOneWithoutAppointmentsInput!
   endsAt: DateTime!
-  id: String
+  meta: MetaCreateNestedOneWithoutAppointmentInput
   proceduresIds: ProcedureCreateNestedManyWithoutAppointmentsInput
   startsAt: DateTime!
 }
@@ -229,10 +255,16 @@ input AppointmentOrderByWithRelationInput {
   customerId: SortOrder
   endsAt: SortOrder
   id: SortOrder
+  meta: MetaOrderByWithRelationInput
   proceduresIds: ProcedureOrderByRelationAggregateInput
   startsAt: SortOrder
   supervisor: UserOrderByWithRelationInput
   supervisorId: SortOrder
+}
+
+input AppointmentRelationFilter {
+  is: AppointmentWhereInput
+  isNot: AppointmentWhereInput
 }
 
 enum AppointmentScalarFieldEnum {
@@ -268,7 +300,7 @@ input AppointmentScalarWhereWithAggregatesInput {
 input AppointmentUpdateInput {
   customer: UserUpdateOneRequiredWithoutAppointmentsNestedInput
   endsAt: DateTimeFieldUpdateOperationsInput
-  id: StringFieldUpdateOperationsInput
+  meta: MetaUpdateOneWithoutAppointmentNestedInput
   proceduresIds: ProcedureUpdateManyWithoutAppointmentsNestedInput
   startsAt: DateTimeFieldUpdateOperationsInput
   supervisor: UserUpdateOneRequiredWithoutSupervisedAppointmentsNestedInput
@@ -276,7 +308,6 @@ input AppointmentUpdateInput {
 
 input AppointmentUpdateManyMutationInput {
   endsAt: DateTimeFieldUpdateOperationsInput
-  id: StringFieldUpdateOperationsInput
   startsAt: DateTimeFieldUpdateOperationsInput
 }
 
@@ -336,6 +367,16 @@ input AppointmentUpdateManyWithoutSupervisorNestedInput {
   upsert: [AppointmentUpsertWithWhereUniqueWithoutSupervisorInput!]
 }
 
+input AppointmentUpdateOneWithoutMetaNestedInput {
+  connect: AppointmentWhereUniqueInput
+  connectOrCreate: AppointmentCreateOrConnectWithoutMetaInput
+  create: AppointmentCreateWithoutMetaInput
+  delete: Boolean
+  disconnect: Boolean
+  update: AppointmentUpdateWithoutMetaInput
+  upsert: AppointmentUpsertWithoutMetaInput
+}
+
 input AppointmentUpdateWithWhereUniqueWithoutCustomerInput {
   data: AppointmentUpdateWithoutCustomerInput!
   where: AppointmentWhereUniqueInput!
@@ -353,7 +394,15 @@ input AppointmentUpdateWithWhereUniqueWithoutSupervisorInput {
 
 input AppointmentUpdateWithoutCustomerInput {
   endsAt: DateTimeFieldUpdateOperationsInput
-  id: StringFieldUpdateOperationsInput
+  meta: MetaUpdateOneWithoutAppointmentNestedInput
+  proceduresIds: ProcedureUpdateManyWithoutAppointmentsNestedInput
+  startsAt: DateTimeFieldUpdateOperationsInput
+  supervisor: UserUpdateOneRequiredWithoutSupervisedAppointmentsNestedInput
+}
+
+input AppointmentUpdateWithoutMetaInput {
+  customer: UserUpdateOneRequiredWithoutAppointmentsNestedInput
+  endsAt: DateTimeFieldUpdateOperationsInput
   proceduresIds: ProcedureUpdateManyWithoutAppointmentsNestedInput
   startsAt: DateTimeFieldUpdateOperationsInput
   supervisor: UserUpdateOneRequiredWithoutSupervisedAppointmentsNestedInput
@@ -362,7 +411,7 @@ input AppointmentUpdateWithoutCustomerInput {
 input AppointmentUpdateWithoutProceduresIdsInput {
   customer: UserUpdateOneRequiredWithoutAppointmentsNestedInput
   endsAt: DateTimeFieldUpdateOperationsInput
-  id: StringFieldUpdateOperationsInput
+  meta: MetaUpdateOneWithoutAppointmentNestedInput
   startsAt: DateTimeFieldUpdateOperationsInput
   supervisor: UserUpdateOneRequiredWithoutSupervisedAppointmentsNestedInput
 }
@@ -370,7 +419,7 @@ input AppointmentUpdateWithoutProceduresIdsInput {
 input AppointmentUpdateWithoutSupervisorInput {
   customer: UserUpdateOneRequiredWithoutAppointmentsNestedInput
   endsAt: DateTimeFieldUpdateOperationsInput
-  id: StringFieldUpdateOperationsInput
+  meta: MetaUpdateOneWithoutAppointmentNestedInput
   proceduresIds: ProcedureUpdateManyWithoutAppointmentsNestedInput
   startsAt: DateTimeFieldUpdateOperationsInput
 }
@@ -393,6 +442,11 @@ input AppointmentUpsertWithWhereUniqueWithoutSupervisorInput {
   where: AppointmentWhereUniqueInput!
 }
 
+input AppointmentUpsertWithoutMetaInput {
+  create: AppointmentCreateWithoutMetaInput!
+  update: AppointmentUpdateWithoutMetaInput!
+}
+
 input AppointmentWhereInput {
   AND: [AppointmentWhereInput!]
   NOT: [AppointmentWhereInput!]
@@ -401,6 +455,7 @@ input AppointmentWhereInput {
   customerId: StringFilter
   endsAt: DateTimeFilter
   id: StringFilter
+  meta: MetaRelationFilter
   proceduresIds: ProcedureListRelationFilter
   startsAt: DateTimeFilter
   supervisor: UserRelationFilter
@@ -466,26 +521,394 @@ input EnumRoleWithAggregatesFilter {
   notIn: [Role!]
 }
 
+type Meta {
+  appointment: Appointment
+  createdAt: DateTime!
+  createdBy: String!
+  createdByName: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  deletedByName: String!
+  fkId: String!
+  updatedAt: DateTime!
+  updatedBy: String!
+  updatedByName: String!
+  user: User
+}
+
+type MetaCountAggregate {
+  _all: Int!
+  createdAt: Int!
+  createdBy: Int!
+  createdByName: Int!
+  deletedAt: Int!
+  deletedBy: Int!
+  deletedByName: Int!
+  fkId: Int!
+  updatedAt: Int!
+  updatedBy: Int!
+  updatedByName: Int!
+}
+
+input MetaCountOrderByAggregateInput {
+  createdAt: SortOrder
+  createdBy: SortOrder
+  createdByName: SortOrder
+  deletedAt: SortOrder
+  deletedBy: SortOrder
+  deletedByName: SortOrder
+  fkId: SortOrder
+  updatedAt: SortOrder
+  updatedBy: SortOrder
+  updatedByName: SortOrder
+}
+
+input MetaCreateInput {
+  appointment: AppointmentCreateNestedOneWithoutMetaInput
+  createdAt: DateTime!
+  createdBy: String!
+  createdByName: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  deletedByName: String!
+  fkId: String!
+  updatedAt: DateTime!
+  updatedBy: String!
+  updatedByName: String!
+  user: UserCreateNestedOneWithoutMetaInput
+}
+
+input MetaCreateManyInput {
+  createdAt: DateTime!
+  createdBy: String!
+  createdByName: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  deletedByName: String!
+  fkId: String!
+  updatedAt: DateTime!
+  updatedBy: String!
+  updatedByName: String!
+}
+
+input MetaCreateNestedOneWithoutAppointmentInput {
+  connect: MetaWhereUniqueInput
+  connectOrCreate: MetaCreateOrConnectWithoutAppointmentInput
+  create: MetaCreateWithoutAppointmentInput
+}
+
+input MetaCreateNestedOneWithoutUserInput {
+  connect: MetaWhereUniqueInput
+  connectOrCreate: MetaCreateOrConnectWithoutUserInput
+  create: MetaCreateWithoutUserInput
+}
+
+input MetaCreateOrConnectWithoutAppointmentInput {
+  create: MetaCreateWithoutAppointmentInput!
+  where: MetaWhereUniqueInput!
+}
+
+input MetaCreateOrConnectWithoutUserInput {
+  create: MetaCreateWithoutUserInput!
+  where: MetaWhereUniqueInput!
+}
+
+input MetaCreateWithoutAppointmentInput {
+  createdAt: DateTime!
+  createdBy: String!
+  createdByName: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  deletedByName: String!
+  fkId: String!
+  updatedAt: DateTime!
+  updatedBy: String!
+  updatedByName: String!
+  user: UserCreateNestedOneWithoutMetaInput
+}
+
+input MetaCreateWithoutUserInput {
+  appointment: AppointmentCreateNestedOneWithoutMetaInput
+  createdAt: DateTime!
+  createdBy: String!
+  createdByName: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  deletedByName: String!
+  fkId: String!
+  updatedAt: DateTime!
+  updatedBy: String!
+  updatedByName: String!
+}
+
+type MetaGroupBy {
+  _count: MetaCountAggregate
+  _max: MetaMaxAggregate
+  _min: MetaMinAggregate
+  createdAt: DateTime!
+  createdBy: String!
+  createdByName: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  deletedByName: String!
+  fkId: String!
+  updatedAt: DateTime!
+  updatedBy: String!
+  updatedByName: String!
+}
+
+type MetaMaxAggregate {
+  createdAt: DateTime
+  createdBy: String
+  createdByName: String
+  deletedAt: DateTime
+  deletedBy: String
+  deletedByName: String
+  fkId: String
+  updatedAt: DateTime
+  updatedBy: String
+  updatedByName: String
+}
+
+input MetaMaxOrderByAggregateInput {
+  createdAt: SortOrder
+  createdBy: SortOrder
+  createdByName: SortOrder
+  deletedAt: SortOrder
+  deletedBy: SortOrder
+  deletedByName: SortOrder
+  fkId: SortOrder
+  updatedAt: SortOrder
+  updatedBy: SortOrder
+  updatedByName: SortOrder
+}
+
+type MetaMinAggregate {
+  createdAt: DateTime
+  createdBy: String
+  createdByName: String
+  deletedAt: DateTime
+  deletedBy: String
+  deletedByName: String
+  fkId: String
+  updatedAt: DateTime
+  updatedBy: String
+  updatedByName: String
+}
+
+input MetaMinOrderByAggregateInput {
+  createdAt: SortOrder
+  createdBy: SortOrder
+  createdByName: SortOrder
+  deletedAt: SortOrder
+  deletedBy: SortOrder
+  deletedByName: SortOrder
+  fkId: SortOrder
+  updatedAt: SortOrder
+  updatedBy: SortOrder
+  updatedByName: SortOrder
+}
+
+input MetaOrderByWithAggregationInput {
+  _count: MetaCountOrderByAggregateInput
+  _max: MetaMaxOrderByAggregateInput
+  _min: MetaMinOrderByAggregateInput
+  createdAt: SortOrder
+  createdBy: SortOrder
+  createdByName: SortOrder
+  deletedAt: SortOrder
+  deletedBy: SortOrder
+  deletedByName: SortOrder
+  fkId: SortOrder
+  updatedAt: SortOrder
+  updatedBy: SortOrder
+  updatedByName: SortOrder
+}
+
+input MetaOrderByWithRelationInput {
+  appointment: AppointmentOrderByWithRelationInput
+  createdAt: SortOrder
+  createdBy: SortOrder
+  createdByName: SortOrder
+  deletedAt: SortOrder
+  deletedBy: SortOrder
+  deletedByName: SortOrder
+  fkId: SortOrder
+  updatedAt: SortOrder
+  updatedBy: SortOrder
+  updatedByName: SortOrder
+  user: UserOrderByWithRelationInput
+}
+
+input MetaRelationFilter {
+  is: MetaWhereInput
+  isNot: MetaWhereInput
+}
+
+enum MetaScalarFieldEnum {
+  createdAt
+  createdBy
+  createdByName
+  deletedAt
+  deletedBy
+  deletedByName
+  fkId
+  updatedAt
+  updatedBy
+  updatedByName
+}
+
+input MetaScalarWhereWithAggregatesInput {
+  AND: [MetaScalarWhereWithAggregatesInput!]
+  NOT: [MetaScalarWhereWithAggregatesInput!]
+  OR: [MetaScalarWhereWithAggregatesInput!]
+  createdAt: DateTimeWithAggregatesFilter
+  createdBy: StringWithAggregatesFilter
+  createdByName: StringWithAggregatesFilter
+  deletedAt: DateTimeWithAggregatesFilter
+  deletedBy: StringWithAggregatesFilter
+  deletedByName: StringWithAggregatesFilter
+  fkId: StringWithAggregatesFilter
+  updatedAt: DateTimeWithAggregatesFilter
+  updatedBy: StringWithAggregatesFilter
+  updatedByName: StringWithAggregatesFilter
+}
+
+input MetaUpdateInput {
+  appointment: AppointmentUpdateOneWithoutMetaNestedInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  createdBy: StringFieldUpdateOperationsInput
+  createdByName: StringFieldUpdateOperationsInput
+  deletedAt: DateTimeFieldUpdateOperationsInput
+  deletedBy: StringFieldUpdateOperationsInput
+  deletedByName: StringFieldUpdateOperationsInput
+  fkId: StringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+  updatedBy: StringFieldUpdateOperationsInput
+  updatedByName: StringFieldUpdateOperationsInput
+  user: UserUpdateOneWithoutMetaNestedInput
+}
+
+input MetaUpdateManyMutationInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  createdBy: StringFieldUpdateOperationsInput
+  createdByName: StringFieldUpdateOperationsInput
+  deletedAt: DateTimeFieldUpdateOperationsInput
+  deletedBy: StringFieldUpdateOperationsInput
+  deletedByName: StringFieldUpdateOperationsInput
+  fkId: StringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+  updatedBy: StringFieldUpdateOperationsInput
+  updatedByName: StringFieldUpdateOperationsInput
+}
+
+input MetaUpdateOneWithoutAppointmentNestedInput {
+  connect: MetaWhereUniqueInput
+  connectOrCreate: MetaCreateOrConnectWithoutAppointmentInput
+  create: MetaCreateWithoutAppointmentInput
+  delete: Boolean
+  disconnect: Boolean
+  update: MetaUpdateWithoutAppointmentInput
+  upsert: MetaUpsertWithoutAppointmentInput
+}
+
+input MetaUpdateOneWithoutUserNestedInput {
+  connect: MetaWhereUniqueInput
+  connectOrCreate: MetaCreateOrConnectWithoutUserInput
+  create: MetaCreateWithoutUserInput
+  delete: Boolean
+  disconnect: Boolean
+  update: MetaUpdateWithoutUserInput
+  upsert: MetaUpsertWithoutUserInput
+}
+
+input MetaUpdateWithoutAppointmentInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  createdBy: StringFieldUpdateOperationsInput
+  createdByName: StringFieldUpdateOperationsInput
+  deletedAt: DateTimeFieldUpdateOperationsInput
+  deletedBy: StringFieldUpdateOperationsInput
+  deletedByName: StringFieldUpdateOperationsInput
+  fkId: StringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+  updatedBy: StringFieldUpdateOperationsInput
+  updatedByName: StringFieldUpdateOperationsInput
+  user: UserUpdateOneWithoutMetaNestedInput
+}
+
+input MetaUpdateWithoutUserInput {
+  appointment: AppointmentUpdateOneWithoutMetaNestedInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  createdBy: StringFieldUpdateOperationsInput
+  createdByName: StringFieldUpdateOperationsInput
+  deletedAt: DateTimeFieldUpdateOperationsInput
+  deletedBy: StringFieldUpdateOperationsInput
+  deletedByName: StringFieldUpdateOperationsInput
+  fkId: StringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+  updatedBy: StringFieldUpdateOperationsInput
+  updatedByName: StringFieldUpdateOperationsInput
+}
+
+input MetaUpsertWithoutAppointmentInput {
+  create: MetaCreateWithoutAppointmentInput!
+  update: MetaUpdateWithoutAppointmentInput!
+}
+
+input MetaUpsertWithoutUserInput {
+  create: MetaCreateWithoutUserInput!
+  update: MetaUpdateWithoutUserInput!
+}
+
+input MetaWhereInput {
+  AND: [MetaWhereInput!]
+  NOT: [MetaWhereInput!]
+  OR: [MetaWhereInput!]
+  appointment: AppointmentRelationFilter
+  createdAt: DateTimeFilter
+  createdBy: StringFilter
+  createdByName: StringFilter
+  deletedAt: DateTimeFilter
+  deletedBy: StringFilter
+  deletedByName: StringFilter
+  fkId: StringFilter
+  updatedAt: DateTimeFilter
+  updatedBy: StringFilter
+  updatedByName: StringFilter
+  user: UserRelationFilter
+}
+
+input MetaWhereUniqueInput {
+  fkId: String
+}
+
 type Mutation {
   createManyAppointment(data: [AppointmentCreateManyInput!]!, skipDuplicates: Boolean): AffectedRowsOutput!
+  createManyMeta(data: [MetaCreateManyInput!]!, skipDuplicates: Boolean): AffectedRowsOutput!
   createManyProcedure(data: [ProcedureCreateManyInput!]!, skipDuplicates: Boolean): AffectedRowsOutput!
   createManyUser(data: [UserCreateManyInput!]!, skipDuplicates: Boolean): AffectedRowsOutput!
   createOneAppointment(data: AppointmentCreateInput!): Appointment!
+  createOneMeta(data: MetaCreateInput!): Meta!
   createOneProcedure(data: ProcedureCreateInput!): Procedure!
   createOneUser(data: UserCreateInput!): User!
   deleteManyAppointment(where: AppointmentWhereInput): AffectedRowsOutput!
+  deleteManyMeta(where: MetaWhereInput): AffectedRowsOutput!
   deleteManyProcedure(where: ProcedureWhereInput): AffectedRowsOutput!
   deleteManyUser(where: UserWhereInput): AffectedRowsOutput!
   deleteOneAppointment(where: AppointmentWhereUniqueInput!): Appointment
+  deleteOneMeta(where: MetaWhereUniqueInput!): Meta
   deleteOneProcedure(where: ProcedureWhereUniqueInput!): Procedure
   deleteOneUser(where: UserWhereUniqueInput!): User
   updateManyAppointment(data: AppointmentUpdateManyMutationInput!, where: AppointmentWhereInput): AffectedRowsOutput!
+  updateManyMeta(data: MetaUpdateManyMutationInput!, where: MetaWhereInput): AffectedRowsOutput!
   updateManyProcedure(data: ProcedureUpdateManyMutationInput!, where: ProcedureWhereInput): AffectedRowsOutput!
   updateManyUser(data: UserUpdateManyMutationInput!, where: UserWhereInput): AffectedRowsOutput!
   updateOneAppointment(data: AppointmentUpdateInput!, where: AppointmentWhereUniqueInput!): Appointment
+  updateOneMeta(data: MetaUpdateInput!, where: MetaWhereUniqueInput!): Meta
   updateOneProcedure(data: ProcedureUpdateInput!, where: ProcedureWhereUniqueInput!): Procedure
   updateOneUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
   upsertOneAppointment(create: AppointmentCreateInput!, update: AppointmentUpdateInput!, where: AppointmentWhereUniqueInput!): Appointment!
+  upsertOneMeta(create: MetaCreateInput!, update: MetaUpdateInput!, where: MetaWhereUniqueInput!): Meta!
   upsertOneProcedure(create: ProcedureCreateInput!, update: ProcedureUpdateInput!, where: ProcedureWhereUniqueInput!): Procedure!
   upsertOneUser(create: UserCreateInput!, update: UserUpdateInput!, where: UserWhereUniqueInput!): User!
 }
@@ -822,16 +1245,21 @@ input ProcedureWhereUniqueInput {
 
 type Query {
   aggregateAppointment(cursor: AppointmentWhereUniqueInput, orderBy: [AppointmentOrderByWithRelationInput!], skip: Int, take: Int, where: AppointmentWhereInput): AggregateAppointment!
+  aggregateMeta(cursor: MetaWhereUniqueInput, orderBy: [MetaOrderByWithRelationInput!], skip: Int, take: Int, where: MetaWhereInput): AggregateMeta!
   aggregateProcedure(cursor: ProcedureWhereUniqueInput, orderBy: [ProcedureOrderByWithRelationInput!], skip: Int, take: Int, where: ProcedureWhereInput): AggregateProcedure!
   aggregateUser(cursor: UserWhereUniqueInput, orderBy: [UserOrderByWithRelationInput!], skip: Int, take: Int, where: UserWhereInput): AggregateUser!
   appointment(where: AppointmentWhereUniqueInput!): Appointment
   appointments(cursor: AppointmentWhereUniqueInput, distinct: [AppointmentScalarFieldEnum!], orderBy: [AppointmentOrderByWithRelationInput!], skip: Int, take: Int, where: AppointmentWhereInput): [Appointment!]!
   findFirstAppointment(cursor: AppointmentWhereUniqueInput, distinct: [AppointmentScalarFieldEnum!], orderBy: [AppointmentOrderByWithRelationInput!], skip: Int, take: Int, where: AppointmentWhereInput): Appointment
+  findFirstMeta(cursor: MetaWhereUniqueInput, distinct: [MetaScalarFieldEnum!], orderBy: [MetaOrderByWithRelationInput!], skip: Int, take: Int, where: MetaWhereInput): Meta
   findFirstProcedure(cursor: ProcedureWhereUniqueInput, distinct: [ProcedureScalarFieldEnum!], orderBy: [ProcedureOrderByWithRelationInput!], skip: Int, take: Int, where: ProcedureWhereInput): Procedure
   findFirstUser(cursor: UserWhereUniqueInput, distinct: [UserScalarFieldEnum!], orderBy: [UserOrderByWithRelationInput!], skip: Int, take: Int, where: UserWhereInput): User
   groupByAppointment(by: [AppointmentScalarFieldEnum!]!, having: AppointmentScalarWhereWithAggregatesInput, orderBy: [AppointmentOrderByWithAggregationInput!], skip: Int, take: Int, where: AppointmentWhereInput): [AppointmentGroupBy!]!
+  groupByMeta(by: [MetaScalarFieldEnum!]!, having: MetaScalarWhereWithAggregatesInput, orderBy: [MetaOrderByWithAggregationInput!], skip: Int, take: Int, where: MetaWhereInput): [MetaGroupBy!]!
   groupByProcedure(by: [ProcedureScalarFieldEnum!]!, having: ProcedureScalarWhereWithAggregatesInput, orderBy: [ProcedureOrderByWithAggregationInput!], skip: Int, take: Int, where: ProcedureWhereInput): [ProcedureGroupBy!]!
   groupByUser(by: [UserScalarFieldEnum!]!, having: UserScalarWhereWithAggregatesInput, orderBy: [UserOrderByWithAggregationInput!], skip: Int, take: Int, where: UserWhereInput): [UserGroupBy!]!
+  meta(where: MetaWhereUniqueInput!): Meta
+  metas(cursor: MetaWhereUniqueInput, distinct: [MetaScalarFieldEnum!], orderBy: [MetaOrderByWithRelationInput!], skip: Int, take: Int, where: MetaWhereInput): [Meta!]!
   procedure(where: ProcedureWhereUniqueInput!): Procedure
   procedures(cursor: ProcedureWhereUniqueInput, distinct: [ProcedureScalarFieldEnum!], orderBy: [ProcedureOrderByWithRelationInput!], skip: Int, take: Int, where: ProcedureWhereInput): [Procedure!]!
   user(where: UserWhereUniqueInput!): User
@@ -939,6 +1367,7 @@ type User {
   appointments(cursor: AppointmentWhereUniqueInput, distinct: [AppointmentScalarFieldEnum!], orderBy: [AppointmentOrderByWithRelationInput!], skip: Int, take: Int, where: AppointmentWhereInput): [Appointment!]!
   email: String!
   id: String!
+  meta: Meta
   name: String
   role: Role!
   supervisedAppointments(cursor: AppointmentWhereUniqueInput, distinct: [AppointmentScalarFieldEnum!], orderBy: [AppointmentOrderByWithRelationInput!], skip: Int, take: Int, where: AppointmentWhereInput): [Appointment!]!
@@ -967,7 +1396,7 @@ input UserCountOrderByAggregateInput {
 input UserCreateInput {
   appointments: AppointmentCreateNestedManyWithoutCustomerInput
   email: String!
-  id: String
+  meta: MetaCreateNestedOneWithoutUserInput
   name: String
   role: Role
   supervisedAppointments: AppointmentCreateNestedManyWithoutSupervisorInput
@@ -986,6 +1415,12 @@ input UserCreateNestedOneWithoutAppointmentsInput {
   create: UserCreateWithoutAppointmentsInput
 }
 
+input UserCreateNestedOneWithoutMetaInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutMetaInput
+  create: UserCreateWithoutMetaInput
+}
+
 input UserCreateNestedOneWithoutSupervisedAppointmentsInput {
   connect: UserWhereUniqueInput
   connectOrCreate: UserCreateOrConnectWithoutSupervisedAppointmentsInput
@@ -997,6 +1432,11 @@ input UserCreateOrConnectWithoutAppointmentsInput {
   where: UserWhereUniqueInput!
 }
 
+input UserCreateOrConnectWithoutMetaInput {
+  create: UserCreateWithoutMetaInput!
+  where: UserWhereUniqueInput!
+}
+
 input UserCreateOrConnectWithoutSupervisedAppointmentsInput {
   create: UserCreateWithoutSupervisedAppointmentsInput!
   where: UserWhereUniqueInput!
@@ -1004,7 +1444,15 @@ input UserCreateOrConnectWithoutSupervisedAppointmentsInput {
 
 input UserCreateWithoutAppointmentsInput {
   email: String!
-  id: String
+  meta: MetaCreateNestedOneWithoutUserInput
+  name: String
+  role: Role
+  supervisedAppointments: AppointmentCreateNestedManyWithoutSupervisorInput
+}
+
+input UserCreateWithoutMetaInput {
+  appointments: AppointmentCreateNestedManyWithoutCustomerInput
+  email: String!
   name: String
   role: Role
   supervisedAppointments: AppointmentCreateNestedManyWithoutSupervisorInput
@@ -1013,7 +1461,7 @@ input UserCreateWithoutAppointmentsInput {
 input UserCreateWithoutSupervisedAppointmentsInput {
   appointments: AppointmentCreateNestedManyWithoutCustomerInput
   email: String!
-  id: String
+  meta: MetaCreateNestedOneWithoutUserInput
   name: String
   role: Role
 }
@@ -1070,6 +1518,7 @@ input UserOrderByWithRelationInput {
   appointments: AppointmentOrderByRelationAggregateInput
   email: SortOrder
   id: SortOrder
+  meta: MetaOrderByWithRelationInput
   name: SortOrder
   role: SortOrder
   supervisedAppointments: AppointmentOrderByRelationAggregateInput
@@ -1100,7 +1549,7 @@ input UserScalarWhereWithAggregatesInput {
 input UserUpdateInput {
   appointments: AppointmentUpdateManyWithoutCustomerNestedInput
   email: StringFieldUpdateOperationsInput
-  id: StringFieldUpdateOperationsInput
+  meta: MetaUpdateOneWithoutUserNestedInput
   name: NullableStringFieldUpdateOperationsInput
   role: EnumRoleFieldUpdateOperationsInput
   supervisedAppointments: AppointmentUpdateManyWithoutSupervisorNestedInput
@@ -1108,7 +1557,6 @@ input UserUpdateInput {
 
 input UserUpdateManyMutationInput {
   email: StringFieldUpdateOperationsInput
-  id: StringFieldUpdateOperationsInput
   name: NullableStringFieldUpdateOperationsInput
   role: EnumRoleFieldUpdateOperationsInput
 }
@@ -1129,9 +1577,27 @@ input UserUpdateOneRequiredWithoutSupervisedAppointmentsNestedInput {
   upsert: UserUpsertWithoutSupervisedAppointmentsInput
 }
 
+input UserUpdateOneWithoutMetaNestedInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutMetaInput
+  create: UserCreateWithoutMetaInput
+  delete: Boolean
+  disconnect: Boolean
+  update: UserUpdateWithoutMetaInput
+  upsert: UserUpsertWithoutMetaInput
+}
+
 input UserUpdateWithoutAppointmentsInput {
   email: StringFieldUpdateOperationsInput
-  id: StringFieldUpdateOperationsInput
+  meta: MetaUpdateOneWithoutUserNestedInput
+  name: NullableStringFieldUpdateOperationsInput
+  role: EnumRoleFieldUpdateOperationsInput
+  supervisedAppointments: AppointmentUpdateManyWithoutSupervisorNestedInput
+}
+
+input UserUpdateWithoutMetaInput {
+  appointments: AppointmentUpdateManyWithoutCustomerNestedInput
+  email: StringFieldUpdateOperationsInput
   name: NullableStringFieldUpdateOperationsInput
   role: EnumRoleFieldUpdateOperationsInput
   supervisedAppointments: AppointmentUpdateManyWithoutSupervisorNestedInput
@@ -1140,7 +1606,7 @@ input UserUpdateWithoutAppointmentsInput {
 input UserUpdateWithoutSupervisedAppointmentsInput {
   appointments: AppointmentUpdateManyWithoutCustomerNestedInput
   email: StringFieldUpdateOperationsInput
-  id: StringFieldUpdateOperationsInput
+  meta: MetaUpdateOneWithoutUserNestedInput
   name: NullableStringFieldUpdateOperationsInput
   role: EnumRoleFieldUpdateOperationsInput
 }
@@ -1148,6 +1614,11 @@ input UserUpdateWithoutSupervisedAppointmentsInput {
 input UserUpsertWithoutAppointmentsInput {
   create: UserCreateWithoutAppointmentsInput!
   update: UserUpdateWithoutAppointmentsInput!
+}
+
+input UserUpsertWithoutMetaInput {
+  create: UserCreateWithoutMetaInput!
+  update: UserUpdateWithoutMetaInput!
 }
 
 input UserUpsertWithoutSupervisedAppointmentsInput {
@@ -1162,6 +1633,7 @@ input UserWhereInput {
   appointments: AppointmentListRelationFilter
   email: StringFilter
   id: StringFilter
+  meta: MetaRelationFilter
   name: StringNullableFilter
   role: EnumRoleFilter
   supervisedAppointments: AppointmentListRelationFilter
