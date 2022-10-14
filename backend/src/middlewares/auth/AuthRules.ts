@@ -182,8 +182,8 @@ export const rules: Rules = {
             actions: [ACCESS_ACTION.READ, ACCESS_ACTION.LIST]
         }
     },
-    "company_users": {
-        table: "company_users",
+    "User": {
+        table: "User",
         module: ACCESS_MODULE.ANESTHETISTS,
         write: {
             denyAll: false,

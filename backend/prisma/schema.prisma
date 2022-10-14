@@ -22,20 +22,27 @@ model User {
   role                   Role          @default(USER)
   supervisedAppointments Appointment[] @relation("supervisor")
   appointments           Appointment[] @relation("customer")
-  meta                   Meta
+  meta                   Meta?         @relation(fields: [metaId], references: [fkId])
+  metaId                 String?
 }
 
-//type Meta {
-//    createdAt DateTime
-//    createdBy String
-//    createdByName String
-//    updatedAt DateTime
-//    updatedBy String
-//    updatedByName String
-//    deletedAt DateTime
-//    deletedBy String
-//    deletedByName String
-//}
+model Meta {
+  fkId          String        @id //@default(uuid())
+  createdAt     DateTime
+  createdBy     String
+  createdByName String
+  updatedAt     DateTime
+  updatedBy     String
+  updatedByName String
+  deletedAt     DateTime
+  deletedBy     String
+  deletedByName String
+
+    user       User     @relation(fields: [userId], references: [id])
+    userId     String
+    appointment    Appointment  @relation(fields: [appointmentId], references: [id])
+    appointmentId  String
+}
 
 model Appointment {
   ///id do appointment
@@ -47,6 +54,8 @@ model Appointment {
   proceduresIds Procedure[]
   startsAt      DateTime
   endsAt        DateTime
+  meta          Meta?       @relation(fields: [metaId], references: [fkId])
+  metaId        String?
 }
 
 model Procedure {

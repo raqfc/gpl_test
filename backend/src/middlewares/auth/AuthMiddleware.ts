@@ -42,8 +42,11 @@ export class AuthMiddleware {
         console.log(`2. logInput foundTable: ${tableRules?.table}`)
         console.log("------------------------")
 
-        if (!tableRules || !tablePermissions || !this.hasPermissions(args, tableRules.module, tablePermissions, decodedAuthToken))
+        if (!tableRules || !tablePermissions || !this.hasPermissions(args.where, tableRules.module, tablePermissions, decodedAuthToken))
             return Error("Unauthorized")
+
+        context.decodedAuthToken = decodedAuthToken
+        context.table = tableRules
 
         return await resolve(root, args, context, info)
     }
@@ -53,7 +56,7 @@ export class AuthMiddleware {
     }
 
     private companyCanById(userTokenPermissions: TokenPermissions, companyId: string|null, module: string, action: string): boolean {
-        return companyId != null && userTokenPermissions.c[this.jwCrc32c(companyId)]?.some((el) => {
+        return !companyId || userTokenPermissions.c[this.jwCrc32c(companyId)]?.some((el) => {
             moduleRules[module][action].includes(el)
         });
     }
@@ -72,7 +75,7 @@ export class AuthMiddleware {
             return true
         } else if (permissions.allowLogged && token != null) {
             return true
-        } else if (token?.jw && permissions.allowCompanyUsers && this.belongsToCompany(token!.jw, args.companyId)) {
+        } else if (token?.jw && permissions.allowCompanyUsers && this.belongsToCompany(token!.jw, args?.companyId)) {
             return true
         } else if (!token) {
             return false
@@ -82,9 +85,10 @@ export class AuthMiddleware {
     }
 
     private hasAnyActionsPermissions(args: any, authToken: AuthToken, actions: ACCESS_ACTION[], module: ACCESS_MODULE): boolean {
-        const companyId = args.companyId ?? (() => {
-            return false
-        })()
+        const companyId = args?.companyId
+        if(!companyId)
+            return true
+
         const userTokenPermissions = authToken.jw
 
         for (const action of actions) {
@@ -93,11 +97,11 @@ export class AuthMiddleware {
             })
 
             if (hasProfile && action.toLowerCase().includes("own")) {//beyond having the permission, the data must belong to the user
-                hasProfile = authToken.uid === args.anesthetistId
+                hasProfile = authToken.uid === args?.anesthetistId
             }
 
             if (hasProfile && action === ACCESS_ACTION.MANAGE_FILIAIS) {//beyond having the permission, the user must belong to the matriz
-                hasProfile = this.companyCanById(userTokenPermissions, args.matrizId, module, action)
+                hasProfile = this.companyCanById(userTokenPermissions, args?.matrizId, module, action)
             }
 
             if (hasProfile) {

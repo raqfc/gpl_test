@@ -1,6 +1,10 @@
 import "reflect-metadata";
 
 import path from 'path';
+// import {
+//     ResolversEnhanceMap,
+//     applyResolversEnhanceMap,
+// } from "@generated/type-graphql";
 import { buildSchema } from "type-graphql";
 
 import { ApolloServer } from 'apollo-server-express';
@@ -27,12 +31,26 @@ import { generateAuthMiddlewareSchemaHelper } from "./src/helpers/GenerateAuthMi
 import { generatePrismaFieldNameToTable } from "./src/helpers/GeneratePrismaFieldNameToTable";
 import prisma from "./src/client";
 import { FirebaseIAuth } from "./src/middlewares/auth/FirebaseIAuth";
+import { MetaMiddleware } from "./src/middlewares/meta/MetaMiddleware";
 
+
+// const testMiddleware: MiddlewareFn<any> = ({ context, info }, next) => {
+//     console.log(`context -> ${context}`);
+//     return next();
+// };
 async function startApolloServer() {
     const app = express();
     const httpServer = http.createServer(app);
 
     const pubSub = new PubSub();
+
+    // const resolversEnhanceMap: ResolversEnhanceMap = {
+    //     User: {
+    //         _all: [UseMiddleware(testMiddleware)],
+    //     },
+    // };
+    //
+    // applyResolversEnhanceMap(resolversEnhanceMap);
 
     let schema = await buildSchema({
         resolvers: [ObserveUserSubscriptionResolver, ...resolvers],
@@ -48,10 +66,11 @@ async function startApolloServer() {
     });
 
     const authMiddleware = new AuthMiddleware(new FirebaseIAuth(firebaseApp.auth()))
+    const metaMiddleware = new MetaMiddleware()
 
     await generatePrismaFieldNameToTable()
-    const middlewareSchema = await generateAuthMiddlewareSchemaHelper(authMiddleware)
-    schema = applyMiddleware(schema, middlewareSchema)
+    const middlewareSchema = await generateAuthMiddlewareSchemaHelper([authMiddleware.middleware, metaMiddleware.middleware])
+    schema = applyMiddleware(schema, ...middlewareSchema)
 
 
     const wsServer = new WebSocketServer({
@@ -82,6 +101,7 @@ async function startApolloServer() {
             return ctx;
         },
     }, wsServer);
+
 
     const server = new ApolloServer({
         schema,
