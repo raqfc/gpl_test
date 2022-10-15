@@ -22,25 +22,18 @@ model User {
   role                   Role          @default(USER)
   supervisedAppointments Appointment[] @relation("supervisor")
   appointments           Appointment[] @relation("customer")
-  meta                   Meta?         @relation(fields: [id], references: [fkId])
-  //metaId                 String?  @unique
+
+  createdAt     DateTime?
+  createdBy     String?
+  createdByName String?
+  updatedAt     DateTime?
+  updatedBy     String?
+  updatedByName String?
+  deletedAt     DateTime?
+  deletedBy     String?
+  deletedByName String?
 }
 
-model Meta {
-  fkId          String   @id //@default(uuid())
-  createdAt     DateTime
-  createdBy     String
-  createdByName String
-  updatedAt     DateTime
-  updatedBy     String
-  updatedByName String
-  deletedAt     DateTime
-  deletedBy     String
-  deletedByName String
-
-  user        User?
-  appointment Appointment?
-}
 model Appointment {
   ///id do appointment
   id            String      @id @default(uuid())
@@ -51,8 +44,16 @@ model Appointment {
   proceduresIds Procedure[]
   startsAt      DateTime
   endsAt        DateTime
-  meta          Meta?       @relation(fields: [id], references: [fkId])
-  //metaId        String?     @unique
+
+  createdAt     DateTime?
+  createdBy     String?
+  createdByName String?
+  updatedAt     DateTime?
+  updatedBy     String?
+  updatedByName String?
+  deletedAt     DateTime?
+  deletedBy     String?
+  deletedByName String?
 }
 
 model Procedure {
@@ -60,6 +61,16 @@ model Procedure {
   name         String
   idProc       String
   appointments Appointment[]
+
+  createdAt     DateTime?
+  createdBy     String?
+  createdByName String?
+  updatedAt     DateTime?
+  updatedBy     String?
+  updatedByName String?
+  deletedAt     DateTime?
+  deletedBy     String?
+  deletedByName String?
 }
 
 enum Role {

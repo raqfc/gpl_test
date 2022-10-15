@@ -67,12 +67,10 @@ async function startApolloServer() {
     });
 
     const authMiddleware = new AuthMiddleware(new FirebaseIAuth(firebaseApp.auth()))
-    const metaMiddleware = new MetaMiddleware()
-
 
     await generatePrismaFieldNameToTable()
-    client.$use(metaMiddleware.prismaMiddleware)
-    const middlewareSchema = await generateAuthMiddlewareSchemaHelper([authMiddleware.middleware, metaMiddleware.middleware])
+    // client.$use(metaMiddleware.prismaMiddleware)
+    const middlewareSchema = await generateAuthMiddlewareSchemaHelper([authMiddleware.middleware, MetaMiddleware])
     schema = applyMiddleware(schema, ...middlewareSchema)
 
 

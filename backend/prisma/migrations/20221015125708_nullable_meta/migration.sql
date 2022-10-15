@@ -1,0 +1,32 @@
+-- AlterTable
+ALTER TABLE "Appointment" ALTER COLUMN "createdAt" DROP NOT NULL,
+ALTER COLUMN "createdBy" DROP NOT NULL,
+ALTER COLUMN "createdByName" DROP NOT NULL,
+ALTER COLUMN "deletedAt" DROP NOT NULL,
+ALTER COLUMN "deletedBy" DROP NOT NULL,
+ALTER COLUMN "deletedByName" DROP NOT NULL,
+ALTER COLUMN "updatedAt" DROP NOT NULL,
+ALTER COLUMN "updatedBy" DROP NOT NULL,
+ALTER COLUMN "updatedByName" DROP NOT NULL;
+
+-- AlterTable
+ALTER TABLE "Procedure" ADD COLUMN     "createdAt" TIMESTAMP(3),
+ADD COLUMN     "createdBy" TEXT,
+ADD COLUMN     "createdByName" TEXT,
+ADD COLUMN     "deletedAt" TIMESTAMP(3),
+ADD COLUMN     "deletedBy" TEXT,
+ADD COLUMN     "deletedByName" TEXT,
+ADD COLUMN     "updatedAt" TIMESTAMP(3),
+ADD COLUMN     "updatedBy" TEXT,
+ADD COLUMN     "updatedByName" TEXT;
+
+-- AlterTable
+ALTER TABLE "User" ALTER COLUMN "createdAt" DROP NOT NULL,
+ALTER COLUMN "createdBy" DROP NOT NULL,
+ALTER COLUMN "createdByName" DROP NOT NULL,
+ALTER COLUMN "deletedAt" DROP NOT NULL,
+ALTER COLUMN "deletedBy" DROP NOT NULL,
+ALTER COLUMN "deletedByName" DROP NOT NULL,
+ALTER COLUMN "updatedAt" DROP NOT NULL,
+ALTER COLUMN "updatedBy" DROP NOT NULL,
+ALTER COLUMN "updatedByName" DROP NOT NULL;
